@@ -4,7 +4,7 @@ date: "Wed, 14 May 2025 09:03:10 +0000"
 slug: "making-a-career-change-in-your-30s-40s-or-50s-can-either-result-in-a-career-crisis-or-career-upgrade"
 categories: ["Career coaching", "Career crisis", "Career path", "Career pivot", "Starting over"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/05/Gemini_Generated_Image_africans.png"
+featured_image: "/images/notes/Gemini_Generated_Image_africans.png"
 ---
 In Your 30s, 40s, or 50s, making a career change in your 3 can either result in a career crisis or career upgrade.
 

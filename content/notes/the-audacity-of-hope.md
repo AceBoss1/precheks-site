@@ -4,7 +4,7 @@ date: "Thu, 04 Jan 2024 22:26:54 +0000"
 slug: "the-audacity-of-hope"
 categories: ["Career coaching", "Learning", "Life Hacks"]
 tags: ["mentalhealthadvocate", "speakingengagements"]
-featured_image: "https://precheks.com.ng/wp-content/uploads/2024/01/IMG_7827.jpeg"
+featured_image: "/images/notes/IMG_7827.jpeg"
 ---
 A couple of weeks back, during a chat, someone called me "madam motivation" and went on to say that I sell hope in most of my posts. I smiled and gave the "lol" response.
 During our very hard times years back, my husband had this simple quote that kept us going. We went through loads of awful experiences with each one looking like the worst till one worse than what we thought was the worst overtook it😀😀. 

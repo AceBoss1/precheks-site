@@ -4,7 +4,7 @@ date: "Mon, 05 May 2025 16:10:13 +0000"
 slug: "framing-is-a-very-important-skill-in-the-corporate-sector"
 categories: ["Business Planning", "Business Solutions", "Career coaching", "Learning", "Life Hacks"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/05/dinma.jpg"
+featured_image: "/images/notes/dinma.jpg"
 ---
 Framing is a very important skill to have in your kitty. This skill becomes even more important if you are working in the corporate sector.
 

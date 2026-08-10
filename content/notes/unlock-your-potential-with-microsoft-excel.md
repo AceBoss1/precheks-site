@@ -4,7 +4,7 @@ date: "Thu, 21 Dec 2023 14:36:45 +0000"
 slug: "unlock-your-potential-with-microsoft-excel"
 categories: ["Business Solutions", "Career coaching", "Courses", "Excel", "Learning"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2023/12/IMG_6655.jpeg"
+featured_image: "/images/notes/IMG_6655.jpeg"
 ---
 Unlock Your Potential with Microsoft Excel! 
 

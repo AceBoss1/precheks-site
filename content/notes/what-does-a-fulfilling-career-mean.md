@@ -4,7 +4,7 @@ date: "Wed, 14 May 2025 08:14:40 +0000"
 slug: "what-does-a-fulfilling-career-mean"
 categories: ["Career coaching", "Career vision", "Impact", "Personal values"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/05/Gemini_Generated_Image_70jnhl70jnhl70jn.jpeg"
+featured_image: "/images/notes/Gemini_Generated_Image_70jnhl70jnhl70jn.jpeg"
 ---
 What does a successful career life look like?
 

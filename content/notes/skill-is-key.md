@@ -4,7 +4,7 @@ date: "Thu, 21 Dec 2023 14:36:45 +0000"
 slug: "skill-is-key"
 categories: ["Career coaching", "Courses", "Learning", "Life Hacks"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2023/12/e_blog4.jpg"
+featured_image: "/images/notes/e_blog4.jpg"
 ---
 Skill is Key 🔑
 

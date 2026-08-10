@@ -4,7 +4,7 @@ date: "Wed, 11 Jun 2025 01:29:22 +0000"
 slug: "boost-your-resume-with-quantifiable-achievements-to-stand-out-in-hiring"
 categories: ["Career coaching", "Competitive Analysis", "Impact", "Learning", "Life Hacks"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/06/impact-cheat-sheet.jpg"
+featured_image: "/images/notes/impact-cheat-sheet.jpg"
 ---
 By 
 Emmanuel Adams

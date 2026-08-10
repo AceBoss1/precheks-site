@@ -4,7 +4,7 @@ date: "Fri, 25 Jul 2025 21:56:35 +0000"
 slug: "minding-the-pay-gap"
 categories: ["Career vision", "Competitive Analysis"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/07/pay-gaps.jpeg"
+featured_image: "/images/notes/pay-gaps.jpeg"
 ---
 Why Pay Transparency Isn't Just a Buzzword, It's a Business Imperative
 

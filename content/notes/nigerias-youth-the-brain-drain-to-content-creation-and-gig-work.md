@@ -4,7 +4,7 @@ date: "Mon, 19 May 2025 02:01:13 +0000"
 slug: "nigerias-youth-the-brain-drain-to-content-creation-and-gig-work"
 categories: ["Impact", "Learning", "Life Hacks", "Personal values"]
 tags: ["Brain Drain", "Content Creation", "Nigeria's Youth"]
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/05/TikTok-vs-Textbooks.png"
+featured_image: "/images/notes/TikTok-vs-Textbooks.png"
 ---
 Trading brains for buzz and influence?
 Lately, I’ve noticed something that’s both interesting and a little worrying.

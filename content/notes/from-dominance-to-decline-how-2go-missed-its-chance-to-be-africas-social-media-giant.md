@@ -4,7 +4,7 @@ date: "Sun, 25 May 2025 15:05:00 +0000"
 slug: "from-dominance-to-decline-how-2go-missed-its-chance-to-be-africas-social-media-giant"
 categories: ["Adaptation", "African Startups", "Business Solutions", "Competitive Analysis", "Digital Strategy", "Emerging Markets", "Impact", "Life Hacks", "Mobile Technology", "Nigeria Tech", "Tech History"]
 tags: ["Adaptation", "African Startups", "Competitive Analysis", "Digital Strategy", "Emerging Markets", "Mobile Technology", "Nigeria Tech", "Startup Lessons", "Tech History"]
-featured_image: "https://precheks.com.ng/wp-content/uploads/2025/05/2go.jpg"
+featured_image: "/images/notes/2go.jpg"
 ---
 By 
 Emmanuel Adams

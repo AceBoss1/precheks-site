@@ -20,24 +20,24 @@ const SERVICES = [
 const TESTIMONIALS = [
   {
     name: "Gregory Chioma Elizabeth",
-    role: "Client",
+    role: "Career Coaching Client",
     image: "/images/testimonials/gregory-chioma-elizabeth.jpeg",
     quote:
-      "That clarity session with you was all we needed to point us to where we should be in tech. My husband has finished his advanced excel and now on Data analysis. I tried out basic excel but lost interest on the way lolz I am excited on this UX/UI because I feel it will allow my creativity to gain wings.",
+      "That clarity session with you was all we needed to point us to where we should be in tech. My husband has finished his Advanced Excel and is now on Data Analysis. I tried out Basic Excel but lost interest on the way — lol. I am excited about UX/UI because I feel it will allow my creativity to gain wings.",
   },
   {
     name: "Phebe Ojo Ali",
-    role: "Client",
+    role: "Excel Training Client",
     image: "/images/testimonials/phebe-ojo-ali.jpeg",
     quote:
       "The class is totally worth it. I feel like a PRO now. Too cheap for the value gotten. Thanks so much.",
   },
   {
     name: "Stellamaris Udegbe",
-    role: "Client",
+    role: "Career Coaching Client",
     image: "/images/testimonials/stellamaris-udegbe.jpeg",
     quote:
-      "…was so confused on the next step to follow when I saw a comment on a page by Chimdinma Onwuegbu… with just one phone call, she brought clarity to me & got me thinking about a blend I never thought possible. This is me saying thank you for opening the walls I was holding myself in. I haven't gotten there yet but I know me, once I'm clear on what to do, moving is swiftly done.",
+      "I was so confused on the next step to follow when I saw a comment by Chimdinma Onwuegbu — with just one phone call, she brought clarity to me and got me thinking about a blend I never thought possible. This is me saying thank you for opening the walls I was holding myself in. I haven't gotten there yet, but once I'm clear on what to do, moving is swiftly done.",
   },
 ];
 
@@ -228,7 +228,7 @@ export default function HomePage() {
         <p className="eyebrow">What Clients Say</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-8">
           {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="bg-card border border-rule p-6">
+            <div key={t.name} className="bg-card border border-rule p-6 flex flex-col">
               <Image
                 src={t.image}
                 alt={t.name}
@@ -236,13 +236,15 @@ export default function HomePage() {
                 height={64}
                 className="rounded-full object-cover w-16 h-16"
               />
-              <p className="mt-4 text-slate italic font-body">
-                {/* TODO: replace with the real testimonial quote from this client */}
-                "Add {t.name.split(" ")[0]}'s testimonial here."
+              <p className="mt-4 text-slate italic font-body leading-relaxed flex-1">
+                &ldquo;{t.quote}&rdquo;
               </p>
-              <p className="mt-4 font-ui text-sm font-semibold text-ink">
-                {t.name}
-              </p>
+              <div className="mt-5 border-t border-rule pt-4">
+                <p className="font-ui text-sm font-semibold text-ink">{t.name}</p>
+                <p className="font-mono text-[11px] uppercase tracking-eyebrow text-gold-deep mt-0.5">
+                  {t.role}
+                </p>
+              </div>
             </div>
           ))}
         </div>

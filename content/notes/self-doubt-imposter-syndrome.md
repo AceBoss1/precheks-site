@@ -4,7 +4,7 @@ date: "Wed, 20 Dec 2023 14:36:45 +0000"
 slug: "self-doubt-imposter-syndrome"
 categories: ["Award Ceremony", "Career coaching", "Investment", "Learning", "Life Hacks", "Scholarship"]
 tags: []
-featured_image: "https://precheks.com.ng/wp-content/uploads/2023/12/e_blog2.jpg"
+featured_image: "/images/notes/e_blog2.jpg"
 ---
 Self-Doubt! Imposter Syndrome!!
 
