@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export const metadata = { title: "Shop — Precheks" };
 
 const PRODUCTS = [
@@ -8,6 +10,7 @@ const PRODUCTS = [
     price: "Free",
     type: "Downloadable",
     href: "https://selar.com/78101t",
+    image: "/images/shop/20-it-niches-to-be-explored.jpeg",
     featured: false,
   },
   {
@@ -18,6 +21,7 @@ const PRODUCTS = [
     originalPrice: "$47.92",
     type: "Physical Course",
     href: "https://selar.com/89u90q",
+    image: "/images/shop/ms-excel-beginner-to-advanced.jpg",
     featured: true,
   },
   {
@@ -28,6 +32,7 @@ const PRODUCTS = [
     originalPrice: "$12",
     type: "Downloadable",
     href: "https://selar.com/208003",
+    image: "/images/shop/career-planning-and-development.jpg",
     featured: false,
   },
 ];
@@ -49,23 +54,36 @@ export default function ShopPage() {
             href={p.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`group flex flex-col border bg-card p-6 hover:border-gold transition-colors ${
+            className={`group flex flex-col border bg-card hover:border-gold transition-colors ${
               p.featured ? "border-gold" : "border-rule"
             }`}
           >
-            {/* Type badge */}
-            <span className="font-mono text-[10px] uppercase tracking-eyebrow text-slate">
-              {p.type}
-            </span>
+            {/* Product image */}
+            <div className="relative w-full aspect-[4/3] overflow-hidden bg-paper">
+              <Image
+                src={p.image}
+                alt={p.title}
+                fill
+                className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              {/* Badges overlaid on image */}
+              <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                <span className="bg-ink/80 text-paper font-mono text-[10px] uppercase tracking-eyebrow px-2 py-0.5">
+                  {p.type}
+                </span>
+                {p.featured && (
+                  <span className="bg-gold text-ink text-[10px] font-ui font-semibold uppercase tracking-wide px-2 py-0.5">
+                    Best Seller
+                  </span>
+                )}
+              </div>
+            </div>
 
-            {/* Featured label */}
-            {p.featured && (
-              <span className="mt-2 self-start bg-gold text-ink text-[10px] font-ui font-semibold uppercase tracking-wide px-2 py-0.5">
-                Best Seller
-              </span>
-            )}
+            {/* Card body */}
+            <div className="flex flex-col flex-1 p-6">
 
-            <h3 className="font-display text-xl mt-3 group-hover:text-gold-deep leading-snug">
+            <h3 className="font-display text-xl group-hover:text-gold-deep leading-snug">
               {p.title}
             </h3>
 
@@ -92,6 +110,7 @@ export default function ShopPage() {
             <span className="mt-4 inline-block font-ui text-xs font-semibold uppercase tracking-wideish text-gold-deep group-hover:text-ink transition-colors">
               {p.price === "Free" ? "Download Free →" : "Buy on Selar →"}
             </span>
+            </div>{/* end card body */}
           </a>
         ))}
       </div>
