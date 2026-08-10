@@ -77,29 +77,30 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-12 flex items-center gap-6 border-t border-paper/15 pt-6">
-              <div className="flex -space-x-3">
-                <Image
-                  src="/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
-                  alt="Chimdinma Onwuegbu, Founder & Lead Consultant"
-                  width={48}
-                  height={48}
-                  className="rounded-full border-2 border-ink object-cover w-12 h-12"
-                />
-                <Image
-                  src="/images/headshots/emmanuel-adams-1.jpeg"
-                  alt="Emmanuel Adams, Consultant & Business Development Lead"
-                  width={48}
-                  height={48}
-                  className="rounded-full border-2 border-ink object-cover w-12 h-12"
-                />
+            <div className="mt-12 flex items-center gap-4 border-t border-paper/15 pt-6">
+              <Image
+                src="/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
+                alt="Chimdinma Onwuegbu, Founder & Lead Consultant"
+                width={48}
+                height={48}
+                className="rounded-full border-2 border-gold object-cover w-12 h-12 flex-shrink-0"
+              />
+              <div>
+                <p className="text-sm font-ui text-paper/70">
+                  Led by{" "}
+                  <a
+                    href="https://www.linkedin.com/in/chimdinma-onwuegbu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:text-paper transition-colors font-semibold"
+                  >
+                    Chimdinma Onwuegbu
+                  </a>
+                </p>
+                <p className="text-xs text-paper/50 font-mono mt-0.5 uppercase tracking-wide">
+                  Founder &amp; Lead Consultant
+                </p>
               </div>
-              <p className="text-sm text-paper/70 font-ui">
-                Led by <span className="text-paper">Chimdinma Onwuegbu</span>{" "}
-                (Founder &amp; Lead Consultant) and{" "}
-                <span className="text-paper">Emmanuel Adams</span>{" "}
-                (Business Development Lead)
-              </p>
             </div>
           </div>
 
