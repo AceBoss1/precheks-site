@@ -67,7 +67,7 @@ export default function Comments({
   const canModerate = user?.email && isAdminEmail(user.email);
 
   return (
-    <div className="mt-16 pt-10 border-t-2 border-ink">
+    <div id="comments" className="mt-16 pt-10 border-t-2 border-ink scroll-mt-6">
       <p className="eyebrow">
         Comments {comments.length > 0 && `(${comments.length})`}
       </p>

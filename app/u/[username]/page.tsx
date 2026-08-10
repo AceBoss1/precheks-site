@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getUserByUsername, getCommentsByUser } from "@/lib/users";
 import { getAllNotes } from "@/lib/firestore-notes";
+import { PRODUCTS } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,10 @@ export default async function ProfilePage({
   if (!profile) return notFound();
 
   const [comments, allNotes] = await Promise.all([
-    getCommentsByUser(profile.uid, 10),
-    profile.role === "admin" ? getAllNotes() : Promise.resolve([]),
+    getCommentsByUser(profile.uid, 10).catch(() => [] as Awaited<ReturnType<typeof getCommentsByUser>>),
+    profile.role === "admin"
+      ? getAllNotes().catch(() => [] as Awaited<ReturnType<typeof getAllNotes>>)
+      : Promise.resolve([]),
   ]);
 
   const authoredNotes = allNotes.filter((n) => n.author === profile.displayName);
@@ -93,6 +96,49 @@ export default async function ProfilePage({
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {profile.username === "chimdinma" && (
+        <div className="mt-10">
+          <p className="eyebrow">Books &amp; Courses</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-5">
+            {PRODUCTS.map((p) => (
+              <a
+                key={p.title}
+                href={p.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col border border-rule bg-card hover:border-gold transition-colors"
+              >
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-paper">
+                  <Image
+                    src={p.image}
+                    alt={p.title}
+                    fill
+                    className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    sizes="33vw"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-display text-base group-hover:text-gold-deep leading-snug">
+                    {p.title}
+                  </h4>
+                  <p className="mt-2 font-ui font-bold text-sm text-ink">
+                    {p.price}
+                  </p>
+                </div>
+              </a>
+            ))}
+          </div>
+          <a
+            href="https://selar.com/m/precheks"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-4 font-ui text-xs font-semibold uppercase tracking-wideish text-gold-deep hover:text-ink"
+          >
+            Browse full store →
+          </a>
         </div>
       )}
 

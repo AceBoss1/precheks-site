@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -10,6 +10,29 @@ import {
   hasLiked,
   toggleLike,
 } from "@/lib/engagement";
+
+const SHARE_TARGETS = [
+  {
+    label: "WhatsApp",
+    build: (url: string, title: string) =>
+      `https://wa.me/?text=${encodeURIComponent(title + " " + url)}`,
+  },
+  {
+    label: "X / Twitter",
+    build: (url: string, title: string) =>
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
+  },
+  {
+    label: "Facebook",
+    build: (url: string) =>
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+  },
+  {
+    label: "LinkedIn",
+    build: (url: string) =>
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+  },
+];
 
 export default function SocialBar({
   noteId,
@@ -33,8 +56,9 @@ export default function SocialBar({
   const [shareCount, setShareCount] = useState(initialShareCount);
   const [viewCount, setViewCount] = useState(initialViewCount);
   const [copied, setCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
 
-  // count a view once per browser session per note
   useEffect(() => {
     const key = `viewed:${noteId}`;
     if (!sessionStorage.getItem(key)) {
@@ -51,6 +75,16 @@ export default function SocialBar({
     });
   }, [noteId]);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
+        setShareOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   async function handleLike() {
     if (!uid) {
       router.push("/login");
@@ -61,44 +95,89 @@ export default function SocialBar({
     setLikeCount((c) => c + (nowLiked ? 1 : -1));
   }
 
-  async function handleShare() {
-    const url = `${window.location.origin}/notes/${slug}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, url });
-      } catch {
-        return; // user cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+  function scrollToComments() {
+    document
+      .getElementById("comments")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function recordShare() {
     await incrementShareCount(noteId);
     setShareCount((c) => c + 1);
   }
 
+  async function handleShareClick(buildUrl: (url: string, title: string) => string) {
+    const url = `${window.location.origin}/notes/${slug}`;
+    window.open(buildUrl(url, title), "_blank", "noopener,noreferrer");
+    setShareOpen(false);
+    await recordShare();
+  }
+
+  async function handleCopyLink() {
+    const url = `${window.location.origin}/notes/${slug}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setShareOpen(false);
+    setTimeout(() => setCopied(false), 2000);
+    await recordShare();
+  }
+
   return (
-    <div className="flex items-center gap-6 py-4 border-y border-rule font-ui text-sm">
-      <button
-        onClick={handleLike}
-        className={`flex items-center gap-1.5 transition-colors ${
-          liked ? "text-gold-deep" : "text-slate hover:text-gold-deep"
-        }`}
-      >
-        <span>{liked ? "♥" : "♡"}</span>
-        <span>{likeCount}</span>
-      </button>
-      <button
-        onClick={handleShare}
-        className="flex items-center gap-1.5 text-slate hover:text-gold-deep transition-colors"
-      >
-        <span>↗</span>
-        <span>{copied ? "Link copied" : shareCount}</span>
-      </button>
-      <span className="flex items-center gap-1.5 text-slate">
-        <span>👁</span>
-        <span>{viewCount} views</span>
+    <div className="flex items-center justify-between gap-4 py-5 border-y border-rule">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleLike}
+          className={`flex items-center gap-2 px-4 py-2.5 border font-ui text-sm font-semibold transition-colors ${
+            liked
+              ? "border-gold bg-gold/10 text-gold-deep"
+              : "border-rule text-slate hover:border-gold hover:text-gold-deep"
+          }`}
+        >
+          <span className="text-lg leading-none">{liked ? "♥" : "♡"}</span>
+          <span>{likeCount}</span>
+        </button>
+
+        <button
+          onClick={scrollToComments}
+          className="flex items-center gap-2 px-4 py-2.5 border border-rule text-slate hover:border-gold hover:text-gold-deep font-ui text-sm font-semibold transition-colors"
+        >
+          <span className="text-lg leading-none">💬</span>
+          <span>Comment</span>
+        </button>
+
+        <div className="relative" ref={shareRef}>
+          <button
+            onClick={() => setShareOpen((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2.5 border border-rule text-slate hover:border-gold hover:text-gold-deep font-ui text-sm font-semibold transition-colors"
+          >
+            <span className="text-lg leading-none">↗</span>
+            <span>{copied ? "Link copied" : `Share (${shareCount})`}</span>
+          </button>
+
+          {shareOpen && (
+            <div className="absolute left-0 top-full mt-2 w-56 border border-rule bg-card shadow-lg z-10">
+              {SHARE_TARGETS.map((t) => (
+                <button
+                  key={t.label}
+                  onClick={() => handleShareClick(t.build)}
+                  className="block w-full text-left px-4 py-3 text-sm font-ui hover:bg-paper transition-colors border-b border-rule"
+                >
+                  {t.label}
+                </button>
+              ))}
+              <button
+                onClick={handleCopyLink}
+                className="block w-full text-left px-4 py-3 text-sm font-ui hover:bg-paper transition-colors"
+              >
+                Copy Link
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <span className="font-mono text-xs text-slate whitespace-nowrap">
+        👁 {viewCount} views
       </span>
     </div>
   );

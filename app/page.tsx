@@ -80,7 +80,10 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-12 flex items-center gap-4 border-t border-paper/15 pt-6">
+            <Link
+              href="/u/chimdinma"
+              className="mt-12 flex items-center gap-4 border-t border-paper/15 pt-6 group"
+            >
               <Image
                 src="/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
                 alt="Chimdinma Onwuegbu, Founder & Lead Consultant"
@@ -91,18 +94,15 @@ export default async function HomePage() {
               <div>
                 <p className="text-sm font-ui text-paper/70">
                   Led by{" "}
-                  <Link
-                    href="/u/chimdinma"
-                    className="text-gold hover:text-paper transition-colors font-semibold"
-                  >
+                  <span className="text-gold group-hover:text-paper transition-colors font-semibold">
                     Chimdinma Onwuegbu
-                  </Link>
+                  </span>
                 </p>
                 <p className="text-xs text-paper/50 font-mono mt-0.5 uppercase tracking-wide">
                   Founder &amp; Lead Consultant
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Notes half */}

@@ -39,35 +39,49 @@ export default async function NotePage({
       </h1>
 
       <div className="mt-6 flex items-center justify-between border-y border-rule py-4 flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <Image
-            src={note.author_avatar}
-            alt={note.author}
-            width={44}
-            height={44}
-            className="rounded-full border-2 border-gold object-cover w-11 h-11 flex-shrink-0"
-          />
-          <div>
-            {authorProfile ? (
-              <Link
-                href={`/u/${authorProfile.username}`}
-                className="text-sm font-ui font-semibold text-ink hover:text-gold-deep"
-              >
+        {authorProfile ? (
+          <Link
+            href={`/u/${authorProfile.username}`}
+            className="flex items-center gap-3 group"
+          >
+            <Image
+              src={note.author_avatar}
+              alt={note.author}
+              width={44}
+              height={44}
+              className="rounded-full border-2 border-gold object-cover w-11 h-11 flex-shrink-0"
+            />
+            <div>
+              <p className="text-sm font-ui font-semibold text-ink group-hover:text-gold-deep">
                 By {note.author}{" "}
                 <span className="font-mono text-gold-deep">
                   @{authorProfile.username}
                 </span>
-              </Link>
-            ) : (
+              </p>
+              <p className="text-xs text-slate font-mono mt-0.5 uppercase tracking-wide">
+                {note.author_role}
+              </p>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Image
+              src={note.author_avatar}
+              alt={note.author}
+              width={44}
+              height={44}
+              className="rounded-full border-2 border-gold object-cover w-11 h-11 flex-shrink-0"
+            />
+            <div>
               <p className="text-sm font-ui font-semibold text-ink">
                 By {note.author}
               </p>
-            )}
-            <p className="text-xs text-slate font-mono mt-0.5 uppercase tracking-wide">
-              {note.author_role}
-            </p>
+              <p className="text-xs text-slate font-mono mt-0.5 uppercase tracking-wide">
+                {note.author_role}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
         <p className="font-mono text-xs text-slate whitespace-nowrap">
           {note.date &&
             new Date(note.date).toLocaleDateString("en-NG", {
