@@ -5,6 +5,9 @@ slug: "what-does-a-fulfilling-career-mean"
 categories: ["Career coaching", "Career vision", "Impact", "Personal values"]
 tags: []
 featured_image: "/images/notes/Gemini_Generated_Image_70jnhl70jnhl70jn.jpeg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 What does a successful career life look like?
 

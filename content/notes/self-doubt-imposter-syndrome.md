@@ -5,6 +5,9 @@ slug: "self-doubt-imposter-syndrome"
 categories: ["Award Ceremony", "Career coaching", "Investment", "Learning", "Life Hacks", "Scholarship"]
 tags: []
 featured_image: "/images/notes/e_blog2.jpg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 Self-Doubt! Imposter Syndrome!!
 

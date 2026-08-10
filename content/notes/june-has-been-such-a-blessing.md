@@ -5,6 +5,9 @@ slug: "june-has-been-such-a-blessing"
 categories: ["Award Ceremony", "Career coaching", "Learning", "Life Hacks"]
 tags: ["#dataanalyst", "communication", "data", "growth", "language", "people", "share"]
 featured_image: "/images/notes/IMG_6676.jpeg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 My audience consisted of Doctors, Nurses, Biomedical Scientists, Bankers, Lawyers, Students, Engineers, Business owners, Managers etc. I ensured to speak to everyone  in a language that made sense to where they were at the time.
 I absolutely love doing data - all of the cleaning, sorting and filtering, wrangling and formating, modelling and relationships, Power pivots and queries, V and X lookups, Visualising with Power-BI, Lux, Matplotlib and Seaborn or keeping it simple with Excel dashboards, employing built in AIs where need be and creating visuals that  tell meaningful stories while providing insights. I love the thrill that comes with having to reject or failing to uphold a hypothesis based on statistical revelations. 

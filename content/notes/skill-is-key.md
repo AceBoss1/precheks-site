@@ -5,6 +5,9 @@ slug: "skill-is-key"
 categories: ["Career coaching", "Courses", "Learning", "Life Hacks"]
 tags: []
 featured_image: "/images/notes/e_blog4.jpg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 Skill is Key 🔑
 

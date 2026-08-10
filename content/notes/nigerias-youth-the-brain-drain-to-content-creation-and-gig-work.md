@@ -5,6 +5,9 @@ slug: "nigerias-youth-the-brain-drain-to-content-creation-and-gig-work"
 categories: ["Impact", "Learning", "Life Hacks", "Personal values"]
 tags: ["Brain Drain", "Content Creation", "Nigeria's Youth"]
 featured_image: "/images/notes/TikTok-vs-Textbooks.png"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 Trading brains for buzz and influence?
 Lately, I’ve noticed something that’s both interesting and a little worrying.

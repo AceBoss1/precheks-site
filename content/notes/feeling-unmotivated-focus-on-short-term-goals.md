@@ -5,6 +5,9 @@ slug: "feeling-unmotivated-focus-on-short-term-goals"
 categories: ["Career coaching", "Life Hacks"]
 tags: []
 featured_image: "/images/notes/5f4887de-25e7-443b-a650-4c63b638394a-1.jpg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 What does success mean to you, and how do you define and measure it? We usually have our eyes set on the ultimate focus and goal which might need a big leap to reach. Most times, that could be tiring. Have you ever tried setting multiple short-term goals towards the long-term goal? 
 

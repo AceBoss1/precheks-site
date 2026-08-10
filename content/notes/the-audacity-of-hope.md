@@ -5,6 +5,9 @@ slug: "the-audacity-of-hope"
 categories: ["Career coaching", "Learning", "Life Hacks"]
 tags: ["mentalhealthadvocate", "speakingengagements"]
 featured_image: "/images/notes/IMG_7827.jpeg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 A couple of weeks back, during a chat, someone called me "madam motivation" and went on to say that I sell hope in most of my posts. I smiled and gave the "lol" response.
 During our very hard times years back, my husband had this simple quote that kept us going. We went through loads of awful experiences with each one looking like the worst till one worse than what we thought was the worst overtook it😀😀. 

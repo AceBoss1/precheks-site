@@ -5,6 +5,9 @@ slug: "unlock-your-potential-with-microsoft-excel"
 categories: ["Business Solutions", "Career coaching", "Courses", "Excel", "Learning"]
 tags: []
 featured_image: "/images/notes/IMG_6655.jpeg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 Unlock Your Potential with Microsoft Excel! 
 

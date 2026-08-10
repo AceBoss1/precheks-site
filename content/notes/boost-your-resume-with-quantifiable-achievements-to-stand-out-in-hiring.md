@@ -5,11 +5,10 @@ slug: "boost-your-resume-with-quantifiable-achievements-to-stand-out-in-hiring"
 categories: ["Career coaching", "Competitive Analysis", "Impact", "Learning", "Life Hacks"]
 tags: []
 featured_image: "/images/notes/impact-cheat-sheet.jpg"
+author: "Emmanuel Adams"
+author_role: "Business Development Lead"
+author_avatar: "/images/headshots/emmanuel-adams-1.jpeg"
 ---
-By 
-Emmanuel Adams
-  |  4 min read
-
 As a seasoned business and fintech consultant, deeply involved in career development, I consistently advocate for the integration of robust metrics within professional resumes. This isn’t merely a stylistic preference; it’s a strategic imperative that yields multiple benefits:
 
 Aligning with Business Acumen:

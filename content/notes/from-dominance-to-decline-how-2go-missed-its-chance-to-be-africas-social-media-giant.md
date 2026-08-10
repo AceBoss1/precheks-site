@@ -5,13 +5,10 @@ slug: "from-dominance-to-decline-how-2go-missed-its-chance-to-be-africas-social-
 categories: ["Adaptation", "African Startups", "Business Solutions", "Competitive Analysis", "Digital Strategy", "Emerging Markets", "Impact", "Life Hacks", "Mobile Technology", "Nigeria Tech", "Tech History"]
 tags: ["Adaptation", "African Startups", "Competitive Analysis", "Digital Strategy", "Emerging Markets", "Mobile Technology", "Nigeria Tech", "Startup Lessons", "Tech History"]
 featured_image: "/images/notes/2go.jpg"
+author: "Emmanuel Adams"
+author_role: "Business Development Lead"
+author_avatar: "/images/headshots/emmanuel-adams-1.jpeg"
 ---
-By 
-Emmanuel Adams
- | 
-Consultant/Biz Development Lead
- @Precheks 4 min read 
-
 The meteoric rise and eventual decline of 2go across Africa offer a compelling case study in the dynamics of technology adoption, market leadership, and the critical importance of continuous innovation, adaptation, and, as we now understand, dedicated user support in the fast-paced digital landscape.
 
 A South African Genesis, A Pan-African Phenomenon:

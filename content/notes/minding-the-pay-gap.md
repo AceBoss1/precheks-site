@@ -5,6 +5,9 @@ slug: "minding-the-pay-gap"
 categories: ["Career vision", "Competitive Analysis"]
 tags: []
 featured_image: "/images/notes/pay-gaps.jpeg"
+author: "Chimdinma Onwuegbu"
+author_role: "Founder & Lead Consultant"
+author_avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg"
 ---
 Why Pay Transparency Isn't Just a Buzzword, It's a Business Imperative
 

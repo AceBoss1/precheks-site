@@ -1,55 +1,89 @@
-import Link from "next/link";
-import Image from "next/image";
-import { getAllNotes } from "@/lib/notes";
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import { remark } from "remark";
+import html from "remark-html";
 
-export const metadata = { title: "Notes — Precheks" };
+const NOTES_DIR = path.join(process.cwd(), "content/notes");
 
-export default function NotesPage() {
-  const notes = getAllNotes();
-  const allCategories = Array.from(
-    new Set(notes.flatMap((n) => n.categories))
-  ).slice(0, 8);
+export type NoteMeta = {
+  slug: string;
+  title: string;
+  date: string;
+  categories: string[];
+  tags: string[];
+  featured_image: string;
+  excerpt: string;
+  author: string;
+  author_role: string;
+  author_avatar: string;
+  reading_time: number;
+};
 
-  return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-      <p className="eyebrow">Precheks Journal</p>
-      <h1 className="font-display text-5xl mt-3">Notes</h1>
-      <p className="mt-3 max-w-2xl text-slate font-body text-lg">
-        Career clarity, data skills, and getting work right — writing from
-        the Precheks team.
-      </p>
+function readAll(): { meta: NoteMeta; content: string }[] {
+  const files = fs.existsSync(NOTES_DIR)
+    ? fs.readdirSync(NOTES_DIR).filter((f) => f.endsWith(".md"))
+    : [];
 
-      {allCategories.length > 0 && (
-        <div className="mt-8 flex flex-wrap gap-3 border-y border-rule py-4">
-          {allCategories.map((c) => (
-            <span
-              key={c}
-              className="font-ui text-xs font-semibold uppercase tracking-wideish text-slate"
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-      )}
+  return files.map((filename) => {
+    const raw = fs.readFileSync(path.join(NOTES_DIR, filename), "utf8");
+    const { data, content } = matter(raw);
+    const plain = content.replace(/\s+/g, " ").trim();
+    const wordCount = plain.split(" ").filter(Boolean).length;
+    const readingTime = Math.max(1, Math.round(wordCount / 200));
+    return {
+      meta: {
+        slug: data.slug || filename.replace(/\.md$/, ""),
+        title: data.title || "Untitled",
+        date: data.date || "",
+        categories: data.categories || [],
+        tags: data.tags || [],
+        featured_image: data.featured_image || "",
+        excerpt: plain.slice(0, 180) + (plain.length > 180 ? "…" : ""),
+        author: data.author || "Precheks Team",
+        author_role: data.author_role || "Editorial Team",
+        author_avatar: data.author_avatar || "/images/brand/favicon-icon.png",
+        reading_time: readingTime,
+      },
+      content,
+    };
+  });
+}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 mt-10">
-        {notes.map((n) => (
-          <Link key={n.slug} href={`/notes/${n.slug}`} className="group">
-            {n.featured_image && (
-              <Image
-                src={n.featured_image}
-                alt={n.title}
-                width={400}
-                height={260}
-                className="w-full h-48 object-cover"
-              />
-            )}
-            <p className="eyebrow mt-3">{n.categories[0] || "Notes"}</p>
-            <h3 className="headline-link text-xl mt-1.5">{n.title}</h3>
-            <p className="mt-2 text-sm text-slate">{n.excerpt}</p>
-          </Link>
-        ))}
-      </div>
-    </section>
+export function getAllNotes(): NoteMeta[] {
+  return readAll()
+    .map((n) => n.meta)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getNotesByCategory(category: string): NoteMeta[] {
+  return getAllNotes().filter((n) =>
+    n.categories.some((c) => c.toLowerCase() === category.toLowerCase())
   );
+}
+
+export async function getNoteBySlug(
+  slug: string
+): Promise<{ meta: NoteMeta; contentHtml: string } | null> {
+  const found = readAll().find((n) => n.meta.slug === slug);
+  if (!found) return null;
+  const processed = await remark().use(html).process(found.content);
+  return { meta: found.meta, contentHtml: processed.toString() };
+}
+
+export function getAllSlugs(): string[] {
+  return readAll().map((n) => n.meta.slug);
+}
+
+export function getMoreNotes(excludeSlug: string, limit = 4): NoteMeta[] {
+  const all = getAllNotes().filter((n) => n.slug !== excludeSlug);
+  const currentMeta = getAllNotes().find((n) => n.slug === excludeSlug);
+  const sameCategory = currentMeta
+    ? all.filter((n) =>
+        n.categories.some((c) => currentMeta.categories.includes(c))
+      )
+    : [];
+  const rest = all.filter((n) => !sameCategory.includes(n));
+  const combined = [...sameCategory, ...rest];
+  return combined.slice(0, limit);
 }
