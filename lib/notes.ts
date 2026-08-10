@@ -14,6 +14,10 @@ export type NoteMeta = {
   tags: string[];
   featured_image: string;
   excerpt: string;
+  author: string;
+  author_role: string;
+  author_avatar: string;
+  reading_time: number;
 };
 
 function readAll(): { meta: NoteMeta; content: string }[] {
@@ -25,6 +29,8 @@ function readAll(): { meta: NoteMeta; content: string }[] {
     const raw = fs.readFileSync(path.join(NOTES_DIR, filename), "utf8");
     const { data, content } = matter(raw);
     const plain = content.replace(/\s+/g, " ").trim();
+    const wordCount = plain.split(" ").filter(Boolean).length;
+    const readingTime = Math.max(1, Math.round(wordCount / 200));
     return {
       meta: {
         slug: data.slug || filename.replace(/\.md$/, ""),
@@ -34,6 +40,10 @@ function readAll(): { meta: NoteMeta; content: string }[] {
         tags: data.tags || [],
         featured_image: data.featured_image || "",
         excerpt: plain.slice(0, 180) + (plain.length > 180 ? "…" : ""),
+        author: data.author || "Precheks Team",
+        author_role: data.author_role || "Editorial Team",
+        author_avatar: data.author_avatar || "/images/brand/favicon-icon.png",
+        reading_time: readingTime,
       },
       content,
     };
@@ -63,4 +73,17 @@ export async function getNoteBySlug(
 
 export function getAllSlugs(): string[] {
   return readAll().map((n) => n.meta.slug);
+}
+
+export function getMoreNotes(excludeSlug: string, limit = 4): NoteMeta[] {
+  const all = getAllNotes().filter((n) => n.slug !== excludeSlug);
+  const currentMeta = getAllNotes().find((n) => n.slug === excludeSlug);
+  const sameCategory = currentMeta
+    ? all.filter((n) =>
+        n.categories.some((c) => currentMeta.categories.includes(c))
+      )
+    : [];
+  const rest = all.filter((n) => !sameCategory.includes(n));
+  const combined = [...sameCategory, ...rest];
+  return combined.slice(0, limit);
 }
