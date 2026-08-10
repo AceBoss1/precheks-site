@@ -18,9 +18,27 @@ const SERVICES = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Gregory Chioma Elizabeth", image: "/images/testimonials/gregory-chioma-elizabeth.jpeg" },
-  { name: "Phebe Ojo Ali", image: "/images/testimonials/phebe-ojo-ali.jpeg" },
-  { name: "Stellamaris Udegbe", image: "/images/testimonials/stellamaris-udegbe.jpeg" },
+  {
+    name: "Gregory Chioma Elizabeth",
+    role: "Client",
+    image: "/images/testimonials/gregory-chioma-elizabeth.jpeg",
+    quote:
+      "That clarity session with you was all we needed to point us to where we should be in tech. My husband has finished his advanced excel and now on Data analysis. I tried out basic excel but lost interest on the way lolz I am excited on this UX/UI because I feel it will allow my creativity to gain wings.",
+  },
+  {
+    name: "Phebe Ojo Ali",
+    role: "Client",
+    image: "/images/testimonials/phebe-ojo-ali.jpeg",
+    quote:
+      "The class is totally worth it. I feel like a PRO now. Too cheap for the value gotten. Thanks so much.",
+  },
+  {
+    name: "Stellamaris Udegbe",
+    role: "Client",
+    image: "/images/testimonials/stellamaris-udegbe.jpeg",
+    quote:
+      "…was so confused on the next step to follow when I saw a comment on a page by Chimdinma Onwuegbu… with just one phone call, she brought clarity to me & got me thinking about a blend I never thought possible. This is me saying thank you for opening the walls I was holding myself in. I haven't gotten there yet but I know me, once I'm clear on what to do, moving is swiftly done.",
+  },
 ];
 
 export default function HomePage() {
