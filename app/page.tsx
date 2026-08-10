@@ -42,7 +42,7 @@ const TESTIMONIALS = [
 ];
 
 export default function HomePage() {
-  const notes = getAllNotes().slice(0, 9);
+  const notes = getAllNotes().slice(0, 13);
   const [leadNote, ...restNotes] = notes;
 
   return (
@@ -168,7 +168,7 @@ export default function HomePage() {
               <p className="mt-3 text-slate font-body">{leadNote.excerpt}</p>
             </div>
             <div className="divide-y divide-rule">
-              {restNotes.slice(0, 4).map((n) => (
+              {restNotes.slice(0, 6).map((n) => (
                 <Link
                   key={n.slug}
                   href={`/notes/${n.slug}`}
@@ -183,7 +183,7 @@ export default function HomePage() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 mt-10">
-          {restNotes.slice(4, 9).map((n) => (
+          {restNotes.slice(6, 12).map((n) => (
             <Link key={n.slug} href={`/notes/${n.slug}`} className="group">
               {n.featured_image && (
                 <Image
