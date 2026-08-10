@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllSlugs, getMoreNotes, getNoteBySlug } from "@/lib/notes";
+import { remark } from "remark";
+import html from "remark-html";
+import { getNoteBySlug, getMoreNotes } from "@/lib/firestore-notes";
+import { getUserByDisplayName } from "@/lib/users";
+import SocialBar from "@/components/SocialBar";
+import Comments from "@/components/Comments";
 
-export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function NotePage({
   params,
@@ -14,8 +17,13 @@ export default async function NotePage({
 }) {
   const note = await getNoteBySlug(params.slug);
   if (!note) return notFound();
-  const { meta, contentHtml } = note;
-  const moreNotes = getMoreNotes(meta.slug, 4);
+
+  const [processed, moreNotes, authorProfile] = await Promise.all([
+    remark().use(html).process(note.content),
+    getMoreNotes(note.slug, 4),
+    getUserByDisplayName(note.author),
+  ]);
+  const contentHtml = processed.toString();
 
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
@@ -25,45 +33,56 @@ export default async function NotePage({
       >
         ← All Notes
       </Link>
-      <p className="eyebrow mt-6">{meta.categories[0] || "Notes"}</p>
+      <p className="eyebrow mt-6">{note.categories[0] || "Notes"}</p>
       <h1 className="font-display text-4xl sm:text-5xl mt-3 leading-[1.05]">
-        {meta.title}
+        {note.title}
       </h1>
 
-      {/* Author row + reading time, same treatment as the homepage hero */}
-      <div className="mt-6 flex items-center justify-between border-y border-rule py-4">
+      <div className="mt-6 flex items-center justify-between border-y border-rule py-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Image
-            src={meta.author_avatar}
-            alt={meta.author}
+            src={note.author_avatar}
+            alt={note.author}
             width={44}
             height={44}
             className="rounded-full border-2 border-gold object-cover w-11 h-11 flex-shrink-0"
           />
           <div>
-            <p className="text-sm font-ui font-semibold text-ink">
-              By {meta.author}
-            </p>
+            {authorProfile ? (
+              <Link
+                href={`/u/${authorProfile.username}`}
+                className="text-sm font-ui font-semibold text-ink hover:text-gold-deep"
+              >
+                By {note.author}{" "}
+                <span className="font-mono text-gold-deep">
+                  @{authorProfile.username}
+                </span>
+              </Link>
+            ) : (
+              <p className="text-sm font-ui font-semibold text-ink">
+                By {note.author}
+              </p>
+            )}
             <p className="text-xs text-slate font-mono mt-0.5 uppercase tracking-wide">
-              {meta.author_role}
+              {note.author_role}
             </p>
           </div>
         </div>
         <p className="font-mono text-xs text-slate whitespace-nowrap">
-          {meta.date &&
-            new Date(meta.date).toLocaleDateString("en-NG", {
+          {note.date &&
+            new Date(note.date).toLocaleDateString("en-NG", {
               year: "numeric",
               month: "long",
               day: "numeric",
             })}{" "}
-          &nbsp;|&nbsp; {meta.reading_time} min read
+          &nbsp;|&nbsp; {note.reading_time} min read
         </p>
       </div>
 
-      {meta.featured_image && (
+      {note.featured_image && (
         <Image
-          src={meta.featured_image}
-          alt={meta.title}
+          src={note.featured_image}
+          alt={note.title}
           width={900}
           height={520}
           className="w-full h-auto object-cover mt-8"
@@ -75,9 +94,9 @@ export default async function NotePage({
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
 
-      {meta.tags.length > 0 && (
+      {note.tags.length > 0 && (
         <div className="mt-10 pt-6 border-t border-rule flex flex-wrap gap-3">
-          {meta.tags.map((t) => (
+          {note.tags.map((t) => (
             <span
               key={t}
               className="font-mono text-[11px] uppercase tracking-eyebrow text-slate"
@@ -88,7 +107,19 @@ export default async function NotePage({
         </div>
       )}
 
-      {/* More / trending notes */}
+      <div className="mt-8">
+        <SocialBar
+          noteId={note.id}
+          slug={note.slug}
+          title={note.title}
+          initialViewCount={note.viewCount || 0}
+          initialLikeCount={note.likeCount || 0}
+          initialShareCount={note.shareCount || 0}
+        />
+      </div>
+
+      <Comments noteId={note.id} slug={note.slug} title={note.title} />
+
       {moreNotes.length > 0 && (
         <div className="mt-16 pt-10 border-t-2 border-ink">
           <p className="eyebrow">More from Notes</p>

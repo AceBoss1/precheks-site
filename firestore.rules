@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // EDIT THESE: must match the two emails in lib/admin.ts exactly.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email in [
+        'ezurukam@gmail.com',
+        'precheks.info@gmail.com'
+      ];
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── Notes ────────────────────────────────────────────────
+    match /notes/{noteId} {
+      allow read: if true;
+
+      // Only admins can create/delete posts.
+      allow create, delete: if isAdmin();
+
+      // Admins can edit anything. Anyone (even signed-out visitors) can
+      // bump viewCount. Only signed-in users can bump/undo likeCount.
+      // Anyone can bump shareCount. Each of these is restricted to ONLY
+      // touching that one field, so a reader can never sneak in an edit
+      // to the title/content/etc.
+      allow update: if isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
+        || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount']))
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['shareCount']);
+
+      // Per-user like record — lets us know if *you* liked a post and
+      // stops double-counting. Only you can create/read/delete your own.
+      match /likes/{uid} {
+        allow read, create, delete: if isSignedIn() && request.auth.uid == uid;
+      }
+
+      // Comments — any signed-in reader can post; anyone can read;
+      // only the comment's author or an admin can delete/edit it.
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn()
+          && request.resource.data.authorUid == request.auth.uid;
+        allow update, delete: if isSignedIn()
+          && (request.auth.uid == resource.data.authorUid || isAdmin());
+      }
+    }
+
+    // ── Public profiles ──────────────────────────────────────
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // ── Username reservations (uniqueness) ───────────────────
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if false; // usernames are permanent in this MVP
+    }
+  }
+}

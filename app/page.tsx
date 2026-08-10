@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllNotes } from "@/lib/notes";
+import { getAllNotes } from "@/lib/firestore-notes";
 
 const SERVICES = [
   {
@@ -41,8 +41,11 @@ const TESTIMONIALS = [
   },
 ];
 
-export default function HomePage() {
-  const notes = getAllNotes().slice(0, 13);
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const allNotes = await getAllNotes();
+  const notes = allNotes.slice(0, 13);
   const [leadNote, ...restNotes] = notes;
 
   return (
@@ -88,14 +91,12 @@ export default function HomePage() {
               <div>
                 <p className="text-sm font-ui text-paper/70">
                   Led by{" "}
-                  <a
-                    href="https://www.linkedin.com/in/chimdinma-onwuegbu"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/u/chimdinma"
                     className="text-gold hover:text-paper transition-colors font-semibold"
                   >
                     Chimdinma Onwuegbu
-                  </a>
+                  </Link>
                 </p>
                 <p className="text-xs text-paper/50 font-mono mt-0.5 uppercase tracking-wide">
                   Founder &amp; Lead Consultant
