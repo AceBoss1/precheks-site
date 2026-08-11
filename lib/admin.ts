@@ -36,7 +36,7 @@ export const ADMIN_PROFILES: Record<
       facebook: "https://www.facebook.com/chymdy.achi",
       instagram: "https://www.instagram.com/chymdy_kay",
       twitter: "https://x.com/chymdytwoo",
-      whatsapp: "https://wa.me/+447584160716",
+      whatsapp: "https://wa.me/+447918285805",
     },
   },
 };

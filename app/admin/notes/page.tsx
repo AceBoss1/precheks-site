@@ -44,6 +44,12 @@ export default function AdminNotesPage() {
         </div>
         <div className="flex gap-3">
           <Link
+            href="/admin"
+            className="border border-rule px-5 py-2.5 font-ui text-sm font-semibold hover:border-gold"
+          >
+            ← Dashboard
+          </Link>
+          <Link
             href="/admin/notes/new"
             className="bg-gold text-ink font-ui font-semibold px-5 py-2.5 hover:bg-gold-deep hover:text-paper transition-colors"
           >

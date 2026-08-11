@@ -55,8 +55,15 @@ Cloudinary.
 
 ## Using the CMS (admins only)
 
-- **`/admin/login`** → **`/admin/notes`** — list every note
-  (draft + published), Edit or Delete, or **+ New Note**.
+- **`/admin/login`** → **`/admin`** — a real dashboard: total published
+  notes, drafts, views, likes, shares, comments, and registered users,
+  plus a "Top Notes by Views" table and quick links to manage notes or
+  create a new one.
+- **`/admin/notes`** — list every note (draft + published), Edit or
+  Delete, or **+ New Note**.
+- Access is now checked in the UI too, not just Firestore rules — a
+  signed-in reader who isn't one of your two admin accounts is bounced
+  to the homepage if they try to load any `/admin/*` page.
 - The form: title (auto-slug, editable), categories/tags, author
   picker (Chimdinma or Emmanuel), Cloudinary featured-image upload,
   Markdown content, Draft/Published toggle.
