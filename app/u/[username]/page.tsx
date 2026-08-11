@@ -25,9 +25,15 @@ export default async function ProfilePage({
   if (!profile) return notFound();
 
   const [comments, allNotes] = await Promise.all([
-    getCommentsByUser(profile.uid, 10).catch(() => [] as Awaited<ReturnType<typeof getCommentsByUser>>),
+    getCommentsByUser(profile.uid, 10).catch((err) => {
+      console.error(`getCommentsByUser(${profile.uid}) failed:`, err);
+      return [] as Awaited<ReturnType<typeof getCommentsByUser>>;
+    }),
     profile.role === "admin"
-      ? getAllNotes().catch(() => [] as Awaited<ReturnType<typeof getAllNotes>>)
+      ? getAllNotes().catch((err) => {
+          console.error("getAllNotes() failed on profile page:", err);
+          return [] as Awaited<ReturnType<typeof getAllNotes>>;
+        })
       : Promise.resolve([]),
   ]);
 
@@ -48,7 +54,17 @@ export default async function ProfilePage({
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="font-display text-3xl">{profile.displayName}</h1>
             {profile.role === "admin" && (
-              <span className="text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-gold/20 text-gold-deep">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-gold/20 text-gold-deep">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12 2l2.39 1.94 3.06-.37.72 3.02 2.78 1.45-1.09 2.91 1.09 2.91-2.78 1.45-.72 3.02-3.06-.37L12 20l-2.39-1.94-3.06.37-.72-3.02-2.78-1.45 1.09-2.91-1.09-2.91 2.78-1.45.72-3.02 3.06.37L12 2zm-1.05 13.31l5.34-5.34-1.06-1.06-4.28 4.28-2.12-2.12-1.06 1.06 3.18 3.18z" />
+                </svg>
                 Precheks Team
               </span>
             )}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import AuthNav from "@/components/AuthNav";
+import Greeting from "@/components/Greeting";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -43,26 +45,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Barlow+Condensed:wght@500;600;700&family=Archivo:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        {/* Time-based greeting — runs on the visitor's device, no server clock */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-(function(){
-  function greeting(){
-    var h = new Date().getHours();
-    if(h >= 5  && h < 12) return "Good morning";
-    if(h >= 12 && h < 17) return "Good afternoon";
-    if(h >= 17 && h < 21) return "Good evening";
-    return "Good night";
-  }
-  document.addEventListener("DOMContentLoaded", function(){
-    var el = document.getElementById("precheks-greeting");
-    if(el) el.textContent = greeting();
-  });
-})();
-`,
-          }}
-        />
       </head>
       <body>
         {/* Masthead */}
@@ -71,15 +53,8 @@ export default function RootLayout({
             {/* Top bar */}
             <div className="flex items-center justify-between py-2 text-[11px] font-mono text-slate border-b border-rule">
               <span>{today}</span>
-              {/* Greeting — populated client-side so it reflects the visitor's local time */}
-              <span
-                id="precheks-greeting"
-                className="hidden sm:inline"
-                aria-live="polite"
-              >
-                {/* default shown before JS runs; immediately replaced */}
-                Welcome
-              </span>
+              {/* Greeting — client-only, avoids server/client mismatch */}
+              <Greeting />
             </div>
 
             {/* Logo + nav */}
@@ -106,6 +81,8 @@ export default function RootLayout({
                     {item.label}
                   </Link>
                 ))}
+                <span className="h-4 w-px bg-rule mx-1" />
+                <AuthNav />
               </nav>
             </div>
           </div>

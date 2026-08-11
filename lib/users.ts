@@ -82,7 +82,7 @@ export async function signUpProfile(params: {
       username,
       displayName: admin?.displayName || displayName,
       bio: admin?.bio || "",
-      avatar: admin?.avatar || "/images/brand/favicon-icon.png",
+      avatar: admin?.avatar || "/images/headshots/default-avatar.png",
       social: admin?.social || {},
       role: admin ? "admin" : "reader",
       createdAt: new Date().toISOString(),

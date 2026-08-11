@@ -60,6 +60,8 @@ export type Comment = {
   authorAvatar: string;
   content: string;
   createdAt: string;
+  parentCommentId?: string | null;
+  likeCount?: number;
 };
 
 export async function getComments(noteId: string): Promise<Comment[]> {
@@ -81,7 +83,8 @@ export async function addComment(
     displayName: string;
     avatar: string;
   },
-  content: string
+  content: string,
+  parentCommentId: string | null = null
 ): Promise<void> {
   await addDoc(collection(db, "notes", noteId, "comments"), {
     authorUid: author.uid,
@@ -93,6 +96,8 @@ export async function addComment(
     noteId,
     noteSlug,
     noteTitle,
+    parentCommentId,
+    likeCount: 0,
   });
 }
 
@@ -101,4 +106,42 @@ export async function deleteComment(
   commentId: string
 ): Promise<void> {
   await deleteDoc(doc(db, "notes", noteId, "comments", commentId));
+}
+
+function commentLikeRef(noteId: string, commentId: string, uid: string) {
+  return doc(db, "notes", noteId, "comments", commentId, "commentLikes", uid);
+}
+
+function commentRef(noteId: string, commentId: string) {
+  return doc(db, "notes", noteId, "comments", commentId);
+}
+
+export async function hasLikedComment(
+  noteId: string,
+  commentId: string,
+  uid: string
+): Promise<boolean> {
+  const snap = await getDoc(commentLikeRef(noteId, commentId, uid));
+  return snap.exists();
+}
+
+export async function toggleCommentLike(
+  noteId: string,
+  commentId: string,
+  uid: string
+): Promise<boolean> {
+  const ref = commentLikeRef(noteId, commentId, uid);
+  const existing = await getDoc(ref);
+  const batch = writeBatch(db);
+  if (existing.exists()) {
+    batch.delete(ref);
+    batch.update(commentRef(noteId, commentId), { likeCount: increment(-1) });
+    await batch.commit();
+    return false;
+  } else {
+    batch.set(ref, { likedAt: new Date().toISOString() });
+    batch.update(commentRef(noteId, commentId), { likeCount: increment(1) });
+    await batch.commit();
+    return true;
+  }
 }

@@ -6,8 +6,119 @@ import Image from "next/image";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getUserByUid, UserProfile } from "@/lib/users";
-import { getComments, addComment, deleteComment, Comment } from "@/lib/engagement";
+import {
+  getComments,
+  addComment,
+  deleteComment,
+  hasLikedComment,
+  toggleCommentLike,
+  Comment,
+} from "@/lib/engagement";
 import { isAdminEmail } from "@/lib/admin";
+
+function CommentRow({
+  comment,
+  noteId,
+  user,
+  canModerate,
+  onReply,
+  onDelete,
+  replyOpen,
+  replyBox,
+  isReply,
+}: {
+  comment: Comment;
+  noteId: string;
+  user: User | null | undefined;
+  canModerate: boolean;
+  onReply: (id: string) => void;
+  onDelete: (id: string) => void;
+  replyOpen: boolean;
+  replyBox: React.ReactNode;
+  isReply: boolean;
+}) {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(comment.likeCount || 0);
+
+  useEffect(() => {
+    if (user) {
+      hasLikedComment(noteId, comment.id, user.uid).then(setLiked);
+    } else {
+      setLiked(false);
+    }
+  }, [user, noteId, comment.id]);
+
+  async function handleLike() {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+    const nowLiked = await toggleCommentLike(noteId, comment.id, user.uid);
+    setLiked(nowLiked);
+    setLikeCount((c) => c + (nowLiked ? 1 : -1));
+  }
+
+  return (
+    <div className={isReply ? "flex gap-3 py-4" : "flex gap-3 py-5 first:pt-0"}>
+      <Link href={`/u/${comment.authorUsername}`} className="flex-shrink-0">
+        <Image
+          src={comment.authorAvatar}
+          alt={comment.authorDisplayName}
+          width={isReply ? 32 : 40}
+          height={isReply ? 32 : 40}
+          className={`rounded-full object-cover ${isReply ? "w-8 h-8" : "w-10 h-10"}`}
+        />
+      </Link>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/u/${comment.authorUsername}`}
+            className="font-ui text-sm font-semibold text-ink hover:text-gold-deep"
+          >
+            {comment.authorDisplayName}
+          </Link>
+          <Link
+            href={`/u/${comment.authorUsername}`}
+            className="font-mono text-xs text-gold-deep"
+          >
+            @{comment.authorUsername}
+          </Link>
+        </div>
+        <p className="mt-1 text-sm text-ink font-body">{comment.content}</p>
+
+        <div className="mt-2 flex items-center gap-4 text-xs font-ui">
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-1 transition-colors ${
+              liked ? "text-gold-deep font-semibold" : "text-slate hover:text-gold-deep"
+            }`}
+          >
+            <span>{liked ? "♥" : "♡"}</span>
+            <span>{likeCount > 0 ? likeCount : ""}</span>
+          </button>
+          {!isReply && (
+            <button
+              onClick={() => onReply(comment.id)}
+              className="text-slate hover:text-gold-deep transition-colors"
+            >
+              Reply
+            </button>
+          )}
+          {(user?.uid === comment.authorUid || canModerate) && (
+            <button
+              onClick={() => onDelete(comment.id)}
+              className="text-red-700 hover:text-red-900 transition-colors"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+
+        {replyOpen && <div className="mt-3">{replyBox}</div>}
+      </div>
+    </div>
+  );
+}
 
 export default function Comments({
   noteId,
@@ -23,6 +134,9 @@ export default function Comments({
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [postingReply, setPostingReply] = useState(false);
 
   async function load() {
     setComments(await getComments(noteId));
@@ -58,13 +172,38 @@ export default function Comments({
     setPosting(false);
   }
 
+  async function handleReplySubmit(parentId: string) {
+    if (!user || !profile || !replyText.trim()) return;
+    setPostingReply(true);
+    await addComment(
+      noteId,
+      slug,
+      title,
+      {
+        uid: user.uid,
+        username: profile.username,
+        displayName: profile.displayName,
+        avatar: profile.avatar,
+      },
+      replyText.trim(),
+      parentId
+    );
+    setReplyText("");
+    setReplyingTo(null);
+    await load();
+    setPostingReply(false);
+  }
+
   async function handleDelete(commentId: string) {
     if (!confirm("Delete this comment?")) return;
     await deleteComment(noteId, commentId);
     load();
   }
 
-  const canModerate = user?.email && isAdminEmail(user.email);
+  const canModerate = !!(user?.email && isAdminEmail(user.email));
+  const topLevel = comments.filter((c) => !c.parentCommentId);
+  const repliesFor = (id: string) =>
+    comments.filter((c) => c.parentCommentId === id);
 
   return (
     <div id="comments" className="mt-16 pt-10 border-t-2 border-ink scroll-mt-6">
@@ -108,44 +247,62 @@ export default function Comments({
       ) : null}
 
       <div className="mt-8 divide-y divide-rule">
-        {comments.map((c) => (
-          <div key={c.id} className="flex gap-3 py-5 first:pt-0">
-            <Link href={`/u/${c.authorUsername}`}>
-              <Image
-                src={c.authorAvatar}
-                alt={c.authorDisplayName}
-                width={40}
-                height={40}
-                className="rounded-full object-cover w-10 h-10 flex-shrink-0"
+        {topLevel.map((c) => {
+          const replies = repliesFor(c.id);
+          const replyBox = (
+            <div className="flex gap-2">
+              <input
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={`Reply to ${c.authorDisplayName}…`}
+                className="flex-1 border border-rule bg-card px-3 py-2 text-sm focus:border-gold outline-none"
               />
-            </Link>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Link
-                  href={`/u/${c.authorUsername}`}
-                  className="font-ui text-sm font-semibold text-ink hover:text-gold-deep"
-                >
-                  {c.authorDisplayName}
-                </Link>
-                <Link
-                  href={`/u/${c.authorUsername}`}
-                  className="font-mono text-xs text-gold-deep"
-                >
-                  @{c.authorUsername}
-                </Link>
-              </div>
-              <p className="mt-1 text-sm text-ink font-body">{c.content}</p>
-              {(user?.uid === c.authorUid || canModerate) && (
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  className="mt-1 text-xs text-red-700 hover:text-red-900"
-                >
-                  Delete
-                </button>
+              <button
+                onClick={() => handleReplySubmit(c.id)}
+                disabled={postingReply || !replyText.trim()}
+                className="bg-gold text-ink font-ui text-xs font-semibold px-4 py-2 hover:bg-gold-deep hover:text-paper transition-colors disabled:opacity-50"
+              >
+                Reply
+              </button>
+            </div>
+          );
+
+          return (
+            <div key={c.id}>
+              <CommentRow
+                comment={c}
+                noteId={noteId}
+                user={user}
+                canModerate={canModerate}
+                onReply={(id) =>
+                  setReplyingTo(replyingTo === id ? null : id)
+                }
+                onDelete={handleDelete}
+                replyOpen={replyingTo === c.id && !!user}
+                replyBox={replyBox}
+                isReply={false}
+              />
+              {replies.length > 0 && (
+                <div className="ml-11 pl-3 border-l-2 border-rule divide-y divide-rule">
+                  {replies.map((r) => (
+                    <CommentRow
+                      key={r.id}
+                      comment={r}
+                      noteId={noteId}
+                      user={user}
+                      canModerate={canModerate}
+                      onReply={() => {}}
+                      onDelete={handleDelete}
+                      replyOpen={false}
+                      replyBox={null}
+                      isReply={true}
+                    />
+                  ))}
+                </div>
               )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
