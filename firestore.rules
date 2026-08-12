@@ -63,5 +63,11 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
       allow delete: if false;
     }
+
+    // ── Site-wide settings (contact email, WhatsApp, socials) ─
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

@@ -24,6 +24,7 @@ export type UserProfile = {
   avatar: string;
   social: SocialLinks;
   role: "admin" | "reader";
+  email: string;
   createdAt: string;
 };
 
@@ -85,6 +86,7 @@ export async function signUpProfile(params: {
       avatar: admin?.avatar || "/images/headshots/default-avatar.png",
       social: admin?.social || {},
       role: admin ? "admin" : "reader",
+      email,
       createdAt: new Date().toISOString(),
     };
     tx.set(usernameRef, { uid });
@@ -114,6 +116,7 @@ export async function ensureAdminProfile(user: FirebaseUser): Promise<void> {
     avatar: admin.avatar,
     social: admin.social,
     role: "admin",
+    email: user.email,
     createdAt: new Date().toISOString(),
   };
   await setDoc(usernameRef, { uid: user.uid });
@@ -125,6 +128,12 @@ export async function updateProfile(
   data: Partial<Pick<UserProfile, "displayName" | "bio" | "avatar" | "social">>
 ): Promise<void> {
   await updateDoc(doc(db, USERS, uid), data);
+}
+
+export async function getAllUsers(): Promise<UserProfile[]> {
+  const q = query(collection(db, USERS), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => d.data() as UserProfile);
 }
 
 export type CommentActivity = {
