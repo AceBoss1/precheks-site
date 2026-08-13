@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getUserByUsername, getCommentsByUser } from "@/lib/users";
 import { getAllNotes } from "@/lib/firestore-notes";
 import { PRODUCTS } from "@/lib/products";
+import { EMMANUEL_BOOKS } from "@/lib/emmanuel-books";
 
 export const dynamic = "force-dynamic";
 
@@ -155,6 +156,53 @@ export default async function ProfilePage({
           >
             Browse full store →
           </a>
+        </div>
+      )}
+
+      {profile.username === "emmanuel" && (
+        <div className="mt-10">
+          <p className="eyebrow">Books &amp; Publications</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-5">
+            {EMMANUEL_BOOKS.map((b) => (
+              <a
+                key={b.title}
+                href={b.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col border border-rule bg-card hover:border-gold transition-colors"
+              >
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-paper">
+                  <Image
+                    src={b.image}
+                    alt={b.title}
+                    fill
+                    className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    sizes="33vw"
+                  />
+                  <span className="absolute top-3 left-3 bg-ink/80 text-paper font-mono text-[10px] uppercase tracking-eyebrow px-2 py-0.5">
+                    {b.type}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <h4 className="font-display text-base group-hover:text-gold-deep leading-snug">
+                    {b.title}
+                  </h4>
+                  {b.subtitle && (
+                    <p className="mt-1 text-xs text-slate leading-snug">
+                      {b.subtitle}
+                    </p>
+                  )}
+                  <p
+                    className={`mt-2 font-ui font-bold text-sm ${
+                      b.price === "Free" ? "text-gold-deep" : "text-ink"
+                    }`}
+                  >
+                    {b.price}
+                  </p>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       )}
 

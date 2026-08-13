@@ -23,8 +23,13 @@ export default function ContactPage() {
           </a>
         </div>
         <div>
-          <p className="eyebrow">Online</p>
-          <p className="mt-2 font-body text-lg">precheks.com.ng</p>
+          <p className="eyebrow">Gmail</p>
+          <a
+            href="mailto:precheks.info@gmail.com"
+            className="mt-2 block font-body text-lg text-ink hover:text-gold-deep"
+          >
+            precheks.info@gmail.com
+          </a>
         </div>
       </div>
 
