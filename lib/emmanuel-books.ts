@@ -19,7 +19,7 @@ export const EMMANUEL_BOOKS: Book[] = [
   {
     title: "The Future of Digital Money",
     subtitle: "Cryptocurrency in 2023 and Beyond",
-    price: "See price on Amazon",
+    price: "$9.99",
     type: "Ebook",
     href: "https://www.amazon.com/Future-Digital-Money-Cryptocurrency-Beyond-ebook/dp/B0CK2TRWM6?ref_=ast_author_dp&th=1&psc=1",
     image: "/images/shop/Future-Digital-Money-Cryptocurrency.jpg",
@@ -27,7 +27,7 @@ export const EMMANUEL_BOOKS: Book[] = [
   {
     title: "Entrepreneurship 101",
     subtitle: "Release The Inner Entrepreneur In You!",
-    price: "See price on Amazon",
+    price: "$6.99",
     type: "Ebook",
     href: "https://www.amazon.com/Entrepreneurship-101-Release-Inner-Entrepreneur-ebook/dp/B0BTTWHC5V?ref_=ast_author_dp&th=1&psc=1",
     image: "/images/shop/Entrepreneurship-101-Release-Inner-Entrepreneur.jpg",
