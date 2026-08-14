@@ -80,5 +80,44 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // ── Follows (#NotesApp-only — no Precheks equivalent) ─────
+    // Doc id: `${followerUid}_${username}`. A member can only ever
+    // write their own follow relationship, never one on someone
+    // else's behalf. Mandatory follows (@notesapp + both founders)
+    // can't be deleted by anyone here — same rule for every account,
+    // since there's no paid-tier flag on a user yet to make an
+    // exception for (see lib/follows.ts).
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.followerUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isSignedIn()
+        && resource.data.followerUid == request.auth.uid
+        && resource.data.mandatory != true;
+    }
+
+    // ── Subscriptions (#NotesApp-only) ────────────────────────
+    // Doc id: `${subscriberUid}_${username}`. No payment gateway
+    // wired yet — every doc here has status:"demo" (see
+    // lib/subscriptions.ts).
+    //
+    // Read is public, same as follows — a subscriber count is shown
+    // on journal cards the same way a follower count is, and
+    // getSubscriberCount() runs an aggregation query across every
+    // subscriber of a given username, not just the current user's own
+    // doc, so it can't be restricted to "read your own record only."
+    // The only thing actually gated by a subscription — a premium
+    // note's content — is never in this collection; PremiumGate reads
+    // isSubscribed(), which only ever checks the signed-in user's own
+    // doc, so this doesn't weaken the paywall.
+    // Writes stay owner-only: nobody can create or delete a
+    // subscription on someone else's behalf.
+    match /subscriptions/{subId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.subscriberUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isSignedIn() && resource.data.subscriberUid == request.auth.uid;
+    }
   }
 }

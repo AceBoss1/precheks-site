@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getUserByUsername, getCommentsByUser } from "@/lib/users";
 import { getAllNotes } from "@/lib/firestore-notes";
+import { getRecentCommentsOnNotes } from "@/lib/engagement";
 import { PRODUCTS } from "@/lib/products";
 import { EMMANUEL_BOOKS } from "@/lib/emmanuel-books";
 
@@ -25,7 +26,7 @@ export default async function ProfilePage({
   const profile = await getUserByUsername(params.username);
   if (!profile) return notFound();
 
-  const [comments, allNotes] = await Promise.all([
+  const [ownComments, allNotes] = await Promise.all([
     getCommentsByUser(profile.uid, 10).catch((err) => {
       console.error(`getCommentsByUser(${profile.uid}) failed:`, err);
       return [] as Awaited<ReturnType<typeof getCommentsByUser>>;
@@ -39,6 +40,21 @@ export default async function ProfilePage({
   ]);
 
   const authoredNotes = allNotes.filter((n) => n.author === profile.displayName);
+
+  // Authors: "activity" means comments people left on THEIR writing.
+  // Readers: "activity" means comments they personally wrote elsewhere.
+  const receivedComments =
+    profile.role === "admin"
+      ? await getRecentCommentsOnNotes(
+          authoredNotes.map((n) => n.id),
+          5,
+          10
+        ).catch((err) => {
+          console.error("getRecentCommentsOnNotes failed:", err);
+          return [] as Awaited<ReturnType<typeof getRecentCommentsOnNotes>>;
+        })
+      : [];
+
   const socialEntries = Object.entries(profile.social).filter(([, v]) => v);
 
   return (
@@ -199,6 +215,9 @@ export default async function ProfilePage({
                   >
                     {b.price}
                   </p>
+                  <span className="mt-2 inline-block font-ui text-xs font-semibold uppercase tracking-wideish text-gold-deep group-hover:text-ink transition-colors">
+                    {b.price === "Free" ? "Read Free →" : "Buy on Amazon →"}
+                  </span>
                 </div>
               </a>
             ))}
@@ -207,12 +226,54 @@ export default async function ProfilePage({
       )}
 
       <div className="mt-10">
-        <p className="eyebrow">Recent Activity</p>
-        {comments.length === 0 ? (
+        <p className="eyebrow">
+          {profile.role === "admin" ? "Recent Comments on Their Notes" : "Recent Activity"}
+        </p>
+        {profile.role === "admin" ? (
+          receivedComments.length === 0 ? (
+            <p className="mt-4 text-sm text-slate">No comments yet.</p>
+          ) : (
+            <div className="mt-5 divide-y divide-rule">
+              {receivedComments.map((c) => (
+                <div key={c.id} className="flex gap-3 py-4 first:pt-0">
+                  <Link href={`/u/${c.authorUsername}`} className="flex-shrink-0">
+                    <Image
+                      src={c.authorAvatar}
+                      alt={c.authorDisplayName}
+                      width={36}
+                      height={36}
+                      className="rounded-full object-cover w-9 h-9"
+                    />
+                  </Link>
+                  <div>
+                    <p className="text-xs font-mono text-slate">
+                      <Link
+                        href={`/u/${c.authorUsername}`}
+                        className="text-ink font-semibold hover:text-gold-deep"
+                      >
+                        {c.authorDisplayName}
+                      </Link>{" "}
+                      commented on{" "}
+                      <Link
+                        href={`/notes/${c.noteSlug}`}
+                        className="text-gold-deep hover:text-ink"
+                      >
+                        {c.noteTitle}
+                      </Link>
+                    </p>
+                    <p className="mt-1.5 text-sm text-ink font-body">
+                      &ldquo;{c.content}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : ownComments.length === 0 ? (
           <p className="mt-4 text-sm text-slate">No comments yet.</p>
         ) : (
           <div className="mt-5 divide-y divide-rule">
-            {comments.map((c) => (
+            {ownComments.map((c) => (
               <Link
                 key={c.id}
                 href={`/notes/${c.noteSlug}`}
