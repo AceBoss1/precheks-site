@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getUserByUsername, getCommentsByUser } from "@/lib/users";
 import { getAllNotes } from "@/lib/firestore-notes";
 import { getRecentCommentsOnNotes } from "@/lib/engagement";
@@ -8,6 +9,35 @@ import { PRODUCTS } from "@/lib/products";
 import { EMMANUEL_BOOKS } from "@/lib/emmanuel-books";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { username: string };
+}): Promise<Metadata> {
+  const profile = await getUserByUsername(params.username);
+  if (!profile) return { title: "Profile Not Found" };
+
+  const description =
+    profile.bio || `${profile.displayName}'s profile on Precheks.`;
+
+  return {
+    title: `${profile.displayName} (@${profile.username})`,
+    description,
+    openGraph: {
+      title: profile.displayName,
+      description,
+      type: "profile",
+      images: [profile.avatar],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: profile.displayName,
+      description,
+      images: [profile.avatar],
+    },
+  };
+}
 
 const SOCIAL_LABELS: Record<string, string> = {
   linkedin: "LinkedIn",

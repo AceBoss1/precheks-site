@@ -1,4 +1,17 @@
-export const metadata = { title: "Contact — Precheks" };
+import type { Metadata } from "next";
+import ContactForm from "@/components/ContactForm";
+
+export const metadata: Metadata = {
+  title: "Contact Precheks — Book a Session or Ask a Question",
+  description:
+    "Get in touch with Precheks for career coaching, data analytics consulting, or web & app development. We usually reply within a day.",
+  openGraph: {
+    title: "Contact Precheks",
+    description:
+      "Get in touch with Precheks for career coaching, data analytics consulting, or web & app development.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+};
 
 export default function ContactPage() {
   return (
@@ -33,45 +46,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/*
-        NOTE: This form has no backend yet — CRM/lead capture is deferred.
-        Wire this up to an API route (or a simple mailto/form service) when
-        the CRM phase begins.
-      */}
-      <form className="mt-14 grid grid-cols-1 gap-6 border-t-2 border-ink pt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <label className="block">
-            <span className="eyebrow">Name</span>
-            <input
-              type="text"
-              name="name"
-              className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
-            />
-          </label>
-          <label className="block">
-            <span className="eyebrow">Email</span>
-            <input
-              type="email"
-              name="email"
-              className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
-            />
-          </label>
-        </div>
-        <label className="block">
-          <span className="eyebrow">Message</span>
-          <textarea
-            name="message"
-            rows={5}
-            className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
-          />
-        </label>
-        <button
-          type="submit"
-          className="justify-self-start bg-gold text-ink font-ui font-semibold px-6 py-3 hover:bg-gold-deep hover:text-paper transition-colors"
-        >
-          Send Message
-        </button>
-      </form>
+      <ContactForm />
     </section>
   );
 }

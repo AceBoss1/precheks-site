@@ -1,7 +1,17 @@
 import Image from "next/image";
 import { PRODUCTS } from "@/lib/products";
 
-export const metadata = { title: "Shop — Precheks" };
+export const metadata = {
+  title: "Shop",
+  description:
+    "Courses and digital products from Precheks — MS-Excel training, career planning resources, and IT career guides.",
+  openGraph: {
+    title: "Shop — Precheks",
+    description:
+      "Courses and digital products from Precheks — MS-Excel training, career planning resources, and IT career guides.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+};
 
 export default function ShopPage() {
   return (

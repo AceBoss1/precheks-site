@@ -1,4 +1,14 @@
-export const metadata = { title: "Services — Precheks" };
+export const metadata = {
+  title: "Services",
+  description:
+    "Career coaching, data analytics consulting, and web & app development from Precheks — plus courses in Excel, career planning, and cybersecurity.",
+  openGraph: {
+    title: "Services — Precheks",
+    description:
+      "Career coaching, data analytics consulting, and web & app development from Precheks.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+};
 
 const CORE_SERVICES = [
   {

@@ -1,7 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata = { title: "About — Precheks" };
+export const metadata = {
+  title: "About Us",
+  description:
+    "Meet the Precheks team — Chimdinma Onwuegbu and Emmanuel Adams — and our mission to deliver excellence in career coaching, data consulting, and IT services.",
+  openGraph: {
+    title: "About Precheks",
+    description:
+      "Meet the Precheks team and our mission to deliver excellence in career coaching, data consulting, and IT services.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+};
 
 const VALUES = [
   {

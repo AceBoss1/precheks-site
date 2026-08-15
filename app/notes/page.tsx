@@ -1,7 +1,17 @@
 import { getAllNotes } from "@/lib/firestore-notes";
 import NotesGrid from "@/components/NotesGrid";
 
-export const metadata = { title: "Notes — Precheks" };
+export const metadata = {
+  title: "Notes",
+  description:
+    "Career clarity, data skills, and getting work right — the Precheks journal on skills, careers, and business.",
+  openGraph: {
+    title: "Notes — Precheks",
+    description:
+      "Career clarity, data skills, and getting work right — the Precheks journal.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+};
 export const dynamic = "force-dynamic";
 
 export default async function NotesPage() {

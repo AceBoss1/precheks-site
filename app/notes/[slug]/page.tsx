@@ -3,12 +3,43 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { remark } from "remark";
 import html from "remark-html";
+import type { Metadata } from "next";
 import { getNoteBySlug, getMoreNotes } from "@/lib/firestore-notes";
 import { getUserByDisplayName } from "@/lib/users";
 import SocialBar from "@/components/SocialBar";
 import Comments from "@/components/Comments";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const note = await getNoteBySlug(params.slug);
+  if (!note) return { title: "Note Not Found" };
+
+  const ogImage = note.featured_image || "/images/brand/og-default.jpg";
+
+  return {
+    title: note.title,
+    description: note.excerpt,
+    openGraph: {
+      title: note.title,
+      description: note.excerpt,
+      type: "article",
+      publishedTime: note.date,
+      authors: [note.author],
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: note.title,
+      description: note.excerpt,
+      images: [ogImage],
+    },
+  };
+}
 
 export default async function NotePage({
   params,

@@ -15,10 +15,29 @@ import "./globals.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Precheks — Excellence Delivered",
+  metadataBase: new URL("https://www.precheks.com.ng"),
+  title: {
+    default: "Precheks — Excellence Delivered",
+    template: "%s — Precheks",
+  },
   description:
     "Data, career, and business consulting from Precheks — plus Notes, our journal on skills, careers, and getting work right.",
   icons: { icon: "/images/brand/favicon-icon.png" },
+  openGraph: {
+    siteName: "Precheks",
+    type: "website",
+    title: "Precheks — Excellence Delivered",
+    description:
+      "Data, career, and business consulting from Precheks — plus Notes, our journal on skills, careers, and getting work right.",
+    images: ["/images/brand/og-default.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Precheks — Excellence Delivered",
+    description:
+      "Data, career, and business consulting from Precheks — plus Notes, our journal on skills, careers, and getting work right.",
+    images: ["/images/brand/og-default.jpg"],
+  },
 };
 
 const NAV = [
@@ -150,6 +169,11 @@ export default async function RootLayout({
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <Link href="/privacy-policy" className="hover:text-gold">
+                    Privacy Policy
+                  </Link>
+                </li>
                 <li>
                   <Link href="/admin/login" className="hover:text-gold">
                     Staff Login
