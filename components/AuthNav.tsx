@@ -37,6 +37,11 @@ export default function AuthNav() {
 
   return (
     <div className="flex items-center gap-4">
+      {profile?.role === "writer" && !profile.suspended && (
+        <Link href="/write" className="text-ink hover:text-gold-deep">
+          Write
+        </Link>
+      )}
       {profile && (
         <Link
           href={`/u/${profile.username}`}

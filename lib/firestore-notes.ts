@@ -23,6 +23,7 @@ export type Note = {
   featured_image: string;
   content: string; // markdown
   author: string;
+  authorUid?: string;
   author_role: string;
   author_avatar: string;
   status: "draft" | "published";
@@ -79,6 +80,20 @@ export async function getNoteBySlug(
   if (snap.empty) return null;
   const d = snap.docs[0];
   return withComputed({ id: d.id, ...d.data() } as Note);
+}
+
+export async function getNotesByAuthorUid(
+  uid: string
+): Promise<NoteWithComputed[]> {
+  // Deliberately no orderBy combined with the where() here — a
+  // filter + sort on different fields needs a composite index. Sort
+  // client-side instead, same pattern used elsewhere in this app.
+  const q = query(collection(db, COLLECTION), where("authorUid", "==", uid));
+  const snap = await getDocs(q);
+  const notes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Note));
+  return notes
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .map(withComputed);
 }
 
 export async function getNoteById(id: string): Promise<Note | null> {

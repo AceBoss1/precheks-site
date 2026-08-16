@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Note, slugify, createNote, updateNote } from "@/lib/firestore-notes";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { getUserByUsername, UserProfile } from "@/lib/users";
 
 const AUTHORS = [
   {
     name: "Chimdinma Onwuegbu",
+    username: "chimdinma",
     role: "Founder & Lead Consultant",
     avatar: "/images/headshots/chimdinma-onwuegbu-2-professional.jpeg",
   },
   {
     name: "Emmanuel Adams",
+    username: "emmanuel",
     role: "Business Development Lead",
     avatar: "/images/headshots/emmanuel-adams-1.jpeg",
   },
@@ -22,9 +25,21 @@ const AUTHORS = [
 type Props = {
   noteId?: string;
   initial?: Partial<Note>;
+  // When set, this form is being used by a contributing writer —
+  // author is locked to themselves, the admin dropdown never shows,
+  // and they can only ever author as their own account.
+  writerProfile?: UserProfile;
+  // Where to return to after saving — /admin/notes for admins,
+  // /write for contributing writers.
+  returnTo?: string;
 };
 
-export default function NoteForm({ noteId, initial }: Props) {
+export default function NoteForm({
+  noteId,
+  initial,
+  writerProfile,
+  returnTo = "/admin/notes",
+}: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title || "");
   const [slug, setSlug] = useState(initial?.slug || "");
@@ -71,7 +86,28 @@ export default function NoteForm({ noteId, initial }: Props) {
     e.preventDefault();
     setSaving(true);
     setError("");
-    const author = AUTHORS.find((a) => a.name === authorName) || AUTHORS[0];
+
+    let author: { name: string; role: string; avatar: string };
+    let authorUid: string | undefined;
+
+    if (writerProfile) {
+      author = {
+        name: writerProfile.displayName,
+        role: "Contributing Writer",
+        avatar: writerProfile.avatar,
+      };
+      authorUid = writerProfile.uid;
+    } else {
+      const picked = AUTHORS.find((a) => a.name === authorName) || AUTHORS[0];
+      author = picked;
+      // best-effort — populates authorUid for admin-authored notes too,
+      // but never blocks saving if the lookup fails for any reason
+      const adminProfile = await getUserByUsername(picked.username).catch(
+        () => null
+      );
+      authorUid = adminProfile?.uid;
+    }
+
     const payload = {
       title,
       slug: slug || slugify(title),
@@ -87,6 +123,7 @@ export default function NoteForm({ noteId, initial }: Props) {
       featured_image: featuredImage,
       content,
       author: author.name,
+      ...(authorUid ? { authorUid } : {}),
       author_role: author.role,
       author_avatar: author.avatar,
       status,
@@ -97,7 +134,7 @@ export default function NoteForm({ noteId, initial }: Props) {
       } else {
         await createNote(payload);
       }
-      router.push("/admin/notes");
+      router.push(returnTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
       setSaving(false);
@@ -149,20 +186,41 @@ export default function NoteForm({ noteId, initial }: Props) {
         </label>
       </div>
 
-      <label className="block">
-        <span className="eyebrow">Author</span>
-        <select
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-          className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
-        >
-          {AUTHORS.map((a) => (
-            <option key={a.name} value={a.name}>
-              {a.name} — {a.role}
-            </option>
-          ))}
-        </select>
-      </label>
+      {writerProfile ? (
+        <div className="block">
+          <span className="eyebrow">Author</span>
+          <div className="mt-2 flex items-center gap-3 border border-rule bg-card px-4 py-3">
+            <Image
+              src={writerProfile.avatar}
+              alt={writerProfile.displayName}
+              width={32}
+              height={32}
+              className="rounded-full object-cover w-8 h-8"
+            />
+            <span className="font-body">
+              {writerProfile.displayName}{" "}
+              <span className="text-slate text-sm">
+                — you can only publish as yourself
+              </span>
+            </span>
+          </div>
+        </div>
+      ) : (
+        <label className="block">
+          <span className="eyebrow">Author</span>
+          <select
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
+          >
+            {AUTHORS.map((a) => (
+              <option key={a.name} value={a.name}>
+                {a.name} — {a.role}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <label className="block">
         <span className="eyebrow">Featured Image</span>

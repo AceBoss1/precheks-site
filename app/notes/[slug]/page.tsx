@@ -5,7 +5,7 @@ import { remark } from "remark";
 import html from "remark-html";
 import type { Metadata } from "next";
 import { getNoteBySlug, getMoreNotes } from "@/lib/firestore-notes";
-import { getUserByDisplayName } from "@/lib/users";
+import { getUserByDisplayName, SUSPENDED_AVATAR } from "@/lib/users";
 import SocialBar from "@/components/SocialBar";
 import Comments from "@/components/Comments";
 
@@ -76,7 +76,7 @@ export default async function NotePage({
             className="flex items-center gap-3 group"
           >
             <Image
-              src={note.author_avatar}
+              src={authorProfile?.suspended ? SUSPENDED_AVATAR : note.author_avatar}
               alt={note.author}
               width={44}
               height={44}
@@ -90,7 +90,7 @@ export default async function NotePage({
                 </span>
               </p>
               <p className="text-xs text-slate font-mono mt-0.5 uppercase tracking-wide">
-                {note.author_role}
+                {authorProfile?.suspended ? "Account Suspended" : note.author_role}
               </p>
             </div>
           </Link>
@@ -124,46 +124,61 @@ export default async function NotePage({
         </p>
       </div>
 
-      {note.featured_image && (
-        <Image
-          src={note.featured_image}
-          alt={note.title}
-          width={900}
-          height={520}
-          className="w-full h-auto object-cover mt-8"
-        />
-      )}
-
-      <div
-        className="prose prose-lg max-w-none mt-10 font-body text-ink prose-headings:font-display prose-a:text-gold-deep"
-        dangerouslySetInnerHTML={{ __html: contentHtml }}
-      />
-
-      {note.tags.length > 0 && (
-        <div className="mt-10 pt-6 border-t border-rule flex flex-wrap gap-3">
-          {note.tags.map((t) => (
-            <span
-              key={t}
-              className="font-mono text-[11px] uppercase tracking-eyebrow text-slate"
-            >
-              #{t}
-            </span>
-          ))}
+      {authorProfile?.suspended ? (
+        <div className="mt-10 border-2 border-red-200 bg-red-50 p-8 text-center">
+          <p className="font-display text-2xl text-ink">
+            This post is temporarily unavailable
+          </p>
+          <p className="mt-3 text-slate font-body max-w-md mx-auto">
+            Its author's account is currently suspended for violating our
+            terms of use. This post will show normally again if the
+            suspension is lifted.
+          </p>
         </div>
+      ) : (
+        <>
+          {note.featured_image && (
+            <Image
+              src={note.featured_image}
+              alt={note.title}
+              width={900}
+              height={520}
+              className="w-full h-auto object-cover mt-8"
+            />
+          )}
+
+          <div
+            className="prose prose-lg max-w-none mt-10 font-body text-ink prose-headings:font-display prose-a:text-gold-deep"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
+
+          {note.tags.length > 0 && (
+            <div className="mt-10 pt-6 border-t border-rule flex flex-wrap gap-3">
+              {note.tags.map((t) => (
+                <span
+                  key={t}
+                  className="font-mono text-[11px] uppercase tracking-eyebrow text-slate"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8">
+            <SocialBar
+              noteId={note.id}
+              slug={note.slug}
+              title={note.title}
+              initialViewCount={note.viewCount || 0}
+              initialLikeCount={note.likeCount || 0}
+              initialShareCount={note.shareCount || 0}
+            />
+          </div>
+
+          <Comments noteId={note.id} slug={note.slug} title={note.title} />
+        </>
       )}
-
-      <div className="mt-8">
-        <SocialBar
-          noteId={note.id}
-          slug={note.slug}
-          title={note.title}
-          initialViewCount={note.viewCount || 0}
-          initialLikeCount={note.likeCount || 0}
-          initialShareCount={note.shareCount || 0}
-        />
-      </div>
-
-      <Comments noteId={note.id} slug={note.slug} title={note.title} />
 
       {moreNotes.length > 0 && (
         <div className="mt-16 pt-10 border-t-2 border-ink">

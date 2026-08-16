@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getUserByUsername, getCommentsByUser } from "@/lib/users";
+import { getUserByUsername, getCommentsByUser, SUSPENDED_AVATAR } from "@/lib/users";
 import { getAllNotes } from "@/lib/firestore-notes";
 import { getRecentCommentsOnNotes } from "@/lib/engagement";
 import { PRODUCTS } from "@/lib/products";
@@ -18,8 +18,10 @@ export async function generateMetadata({
   const profile = await getUserByUsername(params.username);
   if (!profile) return { title: "Profile Not Found" };
 
-  const description =
-    profile.bio || `${profile.displayName}'s profile on Precheks.`;
+  const description = profile.suspended
+    ? "This account is temporarily suspended."
+    : profile.bio || `${profile.displayName}'s profile on Precheks.`;
+  const ogImage = profile.suspended ? SUSPENDED_AVATAR : profile.avatar;
 
   return {
     title: `${profile.displayName} (@${profile.username})`,
@@ -28,13 +30,13 @@ export async function generateMetadata({
       title: profile.displayName,
       description,
       type: "profile",
-      images: [profile.avatar],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: profile.displayName,
       description,
-      images: [profile.avatar],
+      images: [ogImage],
     },
   };
 }
@@ -56,12 +58,14 @@ export default async function ProfilePage({
   const profile = await getUserByUsername(params.username);
   if (!profile) return notFound();
 
+  const isAuthor = profile.role === "admin" || profile.role === "writer";
+
   const [ownComments, allNotes] = await Promise.all([
     getCommentsByUser(profile.uid, 10).catch((err) => {
       console.error(`getCommentsByUser(${profile.uid}) failed:`, err);
       return [] as Awaited<ReturnType<typeof getCommentsByUser>>;
     }),
-    profile.role === "admin"
+    isAuthor
       ? getAllNotes().catch((err) => {
           console.error("getAllNotes() failed on profile page:", err);
           return [] as Awaited<ReturnType<typeof getAllNotes>>;
@@ -73,17 +77,16 @@ export default async function ProfilePage({
 
   // Authors: "activity" means comments people left on THEIR writing.
   // Readers: "activity" means comments they personally wrote elsewhere.
-  const receivedComments =
-    profile.role === "admin"
-      ? await getRecentCommentsOnNotes(
-          authoredNotes.map((n) => n.id),
-          5,
-          10
-        ).catch((err) => {
-          console.error("getRecentCommentsOnNotes failed:", err);
-          return [] as Awaited<ReturnType<typeof getRecentCommentsOnNotes>>;
-        })
-      : [];
+  const receivedComments = isAuthor
+    ? await getRecentCommentsOnNotes(
+        authoredNotes.map((n) => n.id),
+        5,
+        10
+      ).catch((err) => {
+        console.error("getRecentCommentsOnNotes failed:", err);
+        return [] as Awaited<ReturnType<typeof getRecentCommentsOnNotes>>;
+      })
+    : [];
 
   const socialEntries = Object.entries(profile.social).filter(([, v]) => v);
 
@@ -91,7 +94,7 @@ export default async function ProfilePage({
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
       <div className="flex items-start gap-6 border-b-2 border-ink pb-8">
         <Image
-          src={profile.avatar}
+          src={profile.suspended ? SUSPENDED_AVATAR : profile.avatar}
           alt={profile.displayName}
           width={96}
           height={96}
@@ -100,7 +103,22 @@ export default async function ProfilePage({
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="font-display text-3xl">{profile.displayName}</h1>
-            {profile.role === "admin" && (
+            {profile.suspended && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-red-100 text-red-800">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12 1a5 5 0 015 5v3h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2v-9a2 2 0 012-2h1V6a5 5 0 015-5zm0 2a3 3 0 00-3 3v3h6V6a3 3 0 00-3-3z" />
+                </svg>
+                Temporarily Suspended
+              </span>
+            )}
+            {!profile.suspended && profile.role === "admin" && (
               <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-gold/20 text-gold-deep">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -115,19 +133,42 @@ export default async function ProfilePage({
                 Precheks Team
               </span>
             )}
+            {!profile.suspended && profile.role === "writer" && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-ink/10 text-ink">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                </svg>
+                Contributing Writer
+              </span>
+            )}
           </div>
           <p className="font-mono text-sm text-gold-deep mt-1">
             @{profile.username}
           </p>
-          {profile.bio && (
-            <p className="mt-3 text-slate font-body max-w-md">{profile.bio}</p>
-          )}
-          {socialEntries.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-4">
-              {socialEntries.map(([key, url]) => (
-                <a
-                  key={key}
-                  href={url}
+          {profile.suspended ? (
+            <p className="mt-3 text-slate font-body max-w-md text-sm italic">
+              This account is temporarily suspended for violating our terms
+              of use. Their posts and comments are hidden until the
+              suspension is lifted.
+            </p>
+          ) : (
+            <>
+              {profile.bio && (
+                <p className="mt-3 text-slate font-body max-w-md">{profile.bio}</p>
+              )}
+              {socialEntries.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-4">
+                  {socialEntries.map(([key, url]) => (
+                    <a
+                      key={key}
+                      href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-ui text-xs font-semibold uppercase tracking-wideish text-gold-deep hover:text-ink"
@@ -137,10 +178,12 @@ export default async function ProfilePage({
               ))}
             </div>
           )}
+            </>
+          )}
         </div>
       </div>
 
-      {authoredNotes.length > 0 && (
+      {!profile.suspended && authoredNotes.length > 0 && (
         <div className="mt-10">
           <p className="eyebrow">Posts</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8 mt-5">
@@ -162,7 +205,7 @@ export default async function ProfilePage({
         </div>
       )}
 
-      {profile.username === "chimdinma" && (
+      {!profile.suspended && profile.username === "chimdinma" && (
         <div className="mt-10">
           <p className="eyebrow">Books &amp; Courses</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-5">
@@ -205,7 +248,7 @@ export default async function ProfilePage({
         </div>
       )}
 
-      {profile.username === "emmanuel" && (
+      {!profile.suspended && profile.username === "emmanuel" && (
         <div className="mt-10">
           <p className="eyebrow">Books &amp; Publications</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-5">
@@ -257,9 +300,14 @@ export default async function ProfilePage({
 
       <div className="mt-10">
         <p className="eyebrow">
-          {profile.role === "admin" ? "Recent Comments on Their Notes" : "Recent Activity"}
+          {isAuthor ? "Recent Comments on Their Notes" : "Recent Activity"}
         </p>
-        {profile.role === "admin" ? (
+        {profile.suspended ? (
+          <p className="mt-4 text-sm text-slate italic">
+            This account is temporarily suspended. Their comments are
+            hidden until the suspension is lifted.
+          </p>
+        ) : isAuthor ? (
           receivedComments.length === 0 ? (
             <p className="mt-4 text-sm text-slate">No comments yet.</p>
           ) : (

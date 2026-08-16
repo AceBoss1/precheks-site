@@ -23,10 +23,17 @@ export type UserProfile = {
   bio: string;
   avatar: string;
   social: SocialLinks;
-  role: "admin" | "reader";
+  role: "admin" | "writer" | "reader";
   email: string;
   createdAt: string;
+  suspended?: boolean;
+  suspendedAt?: string;
+  suspendedReason?: string;
 };
+
+// Shown in place of a suspended account's real avatar everywhere it
+// appears, until they're unsuspended.
+export const SUSPENDED_AVATAR = "/images/headshots/suspended-avatar.png";
 
 const USERS = "users";
 const USERNAMES = "usernames"; // reservation collection, doc id = username
@@ -128,6 +135,30 @@ export async function updateProfile(
   data: Partial<Pick<UserProfile, "displayName" | "bio" | "avatar" | "social">>
 ): Promise<void> {
   await updateDoc(doc(db, USERS, uid), data);
+}
+
+export async function promoteToWriter(uid: string): Promise<void> {
+  await updateDoc(doc(db, USERS, uid), { role: "writer" });
+}
+
+export async function demoteToReader(uid: string): Promise<void> {
+  await updateDoc(doc(db, USERS, uid), { role: "reader" });
+}
+
+export async function suspendUser(uid: string, reason: string): Promise<void> {
+  await updateDoc(doc(db, USERS, uid), {
+    suspended: true,
+    suspendedAt: new Date().toISOString(),
+    suspendedReason: reason,
+  });
+}
+
+export async function unsuspendUser(uid: string): Promise<void> {
+  await updateDoc(doc(db, USERS, uid), {
+    suspended: false,
+    suspendedAt: "",
+    suspendedReason: "",
+  });
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {

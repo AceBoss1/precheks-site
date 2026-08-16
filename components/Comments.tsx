@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getUserByUid, UserProfile } from "@/lib/users";
+import { getUserByUid, UserProfile, SUSPENDED_AVATAR } from "@/lib/users";
 import {
   getComments,
   addComment,
@@ -26,6 +26,7 @@ function CommentRow({
   replyOpen,
   replyBox,
   isReply,
+  suspended,
 }: {
   comment: Comment;
   noteId: string;
@@ -36,17 +37,18 @@ function CommentRow({
   replyOpen: boolean;
   replyBox: React.ReactNode;
   isReply: boolean;
+  suspended: boolean;
 }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(comment.likeCount || 0);
 
   useEffect(() => {
-    if (user) {
+    if (user && !suspended) {
       hasLikedComment(noteId, comment.id, user.uid).then(setLiked);
     } else {
       setLiked(false);
     }
-  }, [user, noteId, comment.id]);
+  }, [user, noteId, comment.id, suspended]);
 
   async function handleLike() {
     if (!user) {
@@ -62,7 +64,7 @@ function CommentRow({
     <div className={isReply ? "flex gap-3 py-4" : "flex gap-3 py-5 first:pt-0"}>
       <Link href={`/u/${comment.authorUsername}`} className="flex-shrink-0">
         <Image
-          src={comment.authorAvatar}
+          src={suspended ? SUSPENDED_AVATAR : comment.authorAvatar}
           alt={comment.authorDisplayName}
           width={isReply ? 32 : 40}
           height={isReply ? 32 : 40}
@@ -83,20 +85,34 @@ function CommentRow({
           >
             @{comment.authorUsername}
           </Link>
+          {suspended && (
+            <span className="text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-red-100 text-red-800">
+              Suspended
+            </span>
+          )}
         </div>
-        <p className="mt-1 text-sm text-ink font-body">{comment.content}</p>
+
+        {suspended ? (
+          <p className="mt-1 text-sm text-slate italic">
+            This comment is from a temporarily suspended account.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-ink font-body">{comment.content}</p>
+        )}
 
         <div className="mt-2 flex items-center gap-4 text-xs font-ui">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-1 transition-colors ${
-              liked ? "text-gold-deep font-semibold" : "text-slate hover:text-gold-deep"
-            }`}
-          >
-            <span>{liked ? "♥" : "♡"}</span>
-            <span>{likeCount > 0 ? likeCount : ""}</span>
-          </button>
-          {!isReply && (
+          {!suspended && (
+            <button
+              onClick={handleLike}
+              className={`flex items-center gap-1 transition-colors ${
+                liked ? "text-gold-deep font-semibold" : "text-slate hover:text-gold-deep"
+              }`}
+            >
+              <span>{liked ? "♥" : "♡"}</span>
+              <span>{likeCount > 0 ? likeCount : ""}</span>
+            </button>
+          )}
+          {!isReply && !suspended && (
             <button
               onClick={() => onReply(comment.id)}
               className="text-slate hover:text-gold-deep transition-colors"
@@ -132,6 +148,7 @@ export default function Comments({
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [suspendedUids, setSuspendedUids] = useState<Set<string>>(new Set());
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -139,7 +156,21 @@ export default function Comments({
   const [postingReply, setPostingReply] = useState(false);
 
   async function load() {
-    setComments(await getComments(noteId));
+    const loaded = await getComments(noteId);
+    setComments(loaded);
+
+    // Check suspension status of every unique commenter — done live
+    // rather than trusting the denormalized authorAvatar/displayName
+    // on the comment doc, since a suspension can happen after a
+    // comment was posted and needs to reflect immediately.
+    const uniqueUids = Array.from(new Set(loaded.map((c) => c.authorUid)));
+    const results = await Promise.all(
+      uniqueUids.map(async (uid) => {
+        const p = await getUserByUid(uid).catch(() => null);
+        return [uid, !!p?.suspended] as const;
+      })
+    );
+    setSuspendedUids(new Set(results.filter(([, s]) => s).map(([uid]) => uid)));
   }
 
   useEffect(() => {
@@ -211,7 +242,12 @@ export default function Comments({
         Comments {comments.length > 0 && `(${comments.length})`}
       </p>
 
-      {user && profile ? (
+      {user && profile?.suspended ? (
+        <p className="mt-6 text-sm text-slate italic">
+          Your account is temporarily suspended and can't post comments
+          right now.
+        </p>
+      ) : user && profile ? (
         <form onSubmit={handleSubmit} className="mt-6 flex gap-3">
           <Image
             src={profile.avatar}
@@ -281,6 +317,7 @@ export default function Comments({
                 replyOpen={replyingTo === c.id && !!user}
                 replyBox={replyBox}
                 isReply={false}
+                suspended={suspendedUids.has(c.authorUid)}
               />
               {replies.length > 0 && (
                 <div className="ml-11 pl-3 border-l-2 border-rule divide-y divide-rule">
@@ -296,6 +333,7 @@ export default function Comments({
                       replyOpen={false}
                       replyBox={null}
                       isReply={true}
+                      suspended={suspendedUids.has(r.authorUid)}
                     />
                   ))}
                 </div>
