@@ -15,6 +15,7 @@ import {
 import { User as FirebaseUser } from "firebase/auth";
 import { db } from "./firebase";
 import { ADMIN_PROFILES, SocialLinks } from "./admin";
+import { createNotification } from "./notifications";
 
 export type UserProfile = {
   uid: string;
@@ -139,10 +140,22 @@ export async function updateProfile(
 
 export async function promoteToWriter(uid: string): Promise<void> {
   await updateDoc(doc(db, USERS, uid), { role: "writer" });
+  await createNotification(
+    uid,
+    "promoted_to_writer",
+    "You've been made a Contributing Writer — you can now publish your own Notes.",
+    "/write"
+  );
 }
 
 export async function demoteToReader(uid: string): Promise<void> {
   await updateDoc(doc(db, USERS, uid), { role: "reader" });
+  await createNotification(
+    uid,
+    "removed_as_writer",
+    "Your Contributing Writer access has been removed. Your existing posts stay live.",
+    "/"
+  );
 }
 
 export async function suspendUser(uid: string, reason: string): Promise<void> {
@@ -151,6 +164,12 @@ export async function suspendUser(uid: string, reason: string): Promise<void> {
     suspendedAt: new Date().toISOString(),
     suspendedReason: reason,
   });
+  await createNotification(
+    uid,
+    "account_suspended",
+    `Your account has been temporarily suspended. Reason: ${reason}`,
+    "/"
+  );
 }
 
 export async function unsuspendUser(uid: string): Promise<void> {
@@ -159,6 +178,12 @@ export async function unsuspendUser(uid: string): Promise<void> {
     suspendedAt: "",
     suspendedReason: "",
   });
+  await createNotification(
+    uid,
+    "account_restored",
+    "Your account has been restored — everything is back to normal.",
+    "/"
+  );
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {

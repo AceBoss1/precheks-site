@@ -5,6 +5,7 @@ import Link from "next/link";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getUserByUid, UserProfile } from "@/lib/users";
+import NotificationBell from "./NotificationBell";
 
 export default function AuthNav() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -42,6 +43,7 @@ export default function AuthNav() {
           Write
         </Link>
       )}
+      {profile && <NotificationBell uid={profile.uid} />}
       {profile && (
         <Link
           href={`/u/${profile.username}`}

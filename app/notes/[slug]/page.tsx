@@ -176,7 +176,12 @@ export default async function NotePage({
             />
           </div>
 
-          <Comments noteId={note.id} slug={note.slug} title={note.title} />
+          <Comments
+            noteId={note.id}
+            slug={note.slug}
+            title={note.title}
+            noteAuthorUid={note.authorUid}
+          />
         </>
       )}
 

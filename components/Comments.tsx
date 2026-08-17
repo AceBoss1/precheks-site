@@ -15,6 +15,7 @@ import {
   Comment,
 } from "@/lib/engagement";
 import { isAdminEmail } from "@/lib/admin";
+import { createNotification } from "@/lib/notifications";
 
 function CommentRow({
   comment,
@@ -140,10 +141,12 @@ export default function Comments({
   noteId,
   slug,
   title,
+  noteAuthorUid,
 }: {
   noteId: string;
   slug: string;
   title: string;
+  noteAuthorUid?: string;
 }) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -198,6 +201,14 @@ export default function Comments({
       },
       text.trim()
     );
+    if (noteAuthorUid && noteAuthorUid !== user.uid) {
+      await createNotification(
+        noteAuthorUid,
+        "comment_on_note",
+        `${profile.displayName} commented on "${title}"`,
+        `/notes/${slug}#comments`
+      ).catch(() => {}); // notification failure shouldn't block the comment itself
+    }
     setText("");
     await load();
     setPosting(false);
@@ -219,6 +230,15 @@ export default function Comments({
       replyText.trim(),
       parentId
     );
+    const parent = comments.find((c) => c.id === parentId);
+    if (parent && parent.authorUid !== user.uid) {
+      await createNotification(
+        parent.authorUid,
+        "reply_to_comment",
+        `${profile.displayName} replied to your comment on "${title}"`,
+        `/notes/${slug}#comments`
+      ).catch(() => {});
+    }
     setReplyText("");
     setReplyingTo(null);
     await load();
