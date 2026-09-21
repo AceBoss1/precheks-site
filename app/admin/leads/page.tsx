@@ -79,6 +79,9 @@ export default function AdminLeadsPage() {
                     >
                       {l.status}
                     </span>
+                    <span className="text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 bg-ink/10 text-ink">
+                      {l.category}
+                    </span>
                   </div>
                   <a
                     href={`mailto:${l.email}`}

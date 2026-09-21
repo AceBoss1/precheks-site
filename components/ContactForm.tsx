@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { createLead } from "@/lib/leads";
+import { createLead, LeadCategory } from "@/lib/leads";
+
+const CATEGORIES: LeadCategory[] = [
+  "General Inquiry",
+  "Career Coaching",
+  "Data Analytics Consulting",
+  "Web & App Development",
+  "Book a Session",
+];
 
 export default function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [category, setCategory] = useState<LeadCategory>("General Inquiry");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle"
@@ -15,10 +24,11 @@ export default function ContactForm() {
     e.preventDefault();
     setStatus("sending");
     try {
-      await createLead({ name, email, message });
+      await createLead({ name, email, category, message });
       setStatus("sent");
       setName("");
       setEmail("");
+      setCategory("General Inquiry");
       setMessage("");
     } catch (err) {
       console.error("Contact form submission failed:", err);
@@ -70,6 +80,20 @@ export default function ContactForm() {
           />
         </label>
       </div>
+      <label className="block">
+        <span className="eyebrow">What's this about?</span>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as LeadCategory)}
+          className="mt-2 w-full border border-rule bg-card px-4 py-3 font-body focus:border-gold outline-none"
+        >
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="block">
         <span className="eyebrow">Message</span>
         <textarea

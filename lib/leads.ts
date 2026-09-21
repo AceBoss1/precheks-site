@@ -12,10 +12,18 @@ import { db } from "./firebase";
 
 export type LeadStatus = "new" | "contacted" | "converted";
 
+export type LeadCategory =
+  | "General Inquiry"
+  | "Career Coaching"
+  | "Data Analytics Consulting"
+  | "Web & App Development"
+  | "Book a Session";
+
 export type Lead = {
   id: string;
   name: string;
   email: string;
+  category: LeadCategory;
   message: string;
   status: LeadStatus;
   createdAt: string;
@@ -26,6 +34,7 @@ const COLLECTION = "leads";
 export async function createLead(data: {
   name: string;
   email: string;
+  category: LeadCategory;
   message: string;
 }): Promise<void> {
   await addDoc(collection(db, COLLECTION), {
