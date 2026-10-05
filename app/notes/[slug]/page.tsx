@@ -6,6 +6,7 @@ import html from "remark-html";
 import type { Metadata } from "next";
 import { getNoteBySlug, getMoreNotes } from "@/lib/firestore-notes";
 import { getUserByDisplayName, SUSPENDED_AVATAR } from "@/lib/users";
+import NotesAppCTA from "@/components/NotesAppCTA";
 import SocialBar from "@/components/SocialBar";
 import Comments from "@/components/Comments";
 
@@ -174,6 +175,11 @@ export default async function NotePage({
               initialLikeCount={note.likeCount || 0}
               initialShareCount={note.shareCount || 0}
             />
+          </div>
+
+          <div className="mt-8 border-t border-rule pt-6">
+            <p className="eyebrow">Work with Precheks</p>
+            <NotesAppCTA className="mt-4" />
           </div>
 
           <Comments
