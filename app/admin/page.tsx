@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { collection, getCountFromServer, collectionGroup } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useAdminAuth } from "@/lib/useAdminAuth";
+import NotesAppPanel from "@/components/NotesAppPanel";
 import { getAllNotes, NoteWithComputed } from "@/lib/firestore-notes";
 
 type NoteStats = {
@@ -293,6 +294,8 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <NotesAppPanel user={user} />
 
       {/* ── Top Notes by Views ────────────────────────────────── */}
       <div className="mt-12">

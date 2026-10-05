@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Note, slugify, createNote, updateNote } from "@/lib/firestore-notes";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { syncNoteToNotesApp } from "@/lib/notesapp-client";
 import { getUserByUsername, UserProfile } from "@/lib/users";
 
 const AUTHORS = [
@@ -131,8 +132,10 @@ export default function NoteForm({
     try {
       if (noteId) {
         await updateNote(noteId, payload);
+        await syncNoteToNotesApp(noteId);
       } else {
-        await createNote(payload);
+        const newId = await createNote(payload);
+        await syncNoteToNotesApp(newId);
       }
       router.push(returnTo);
     } catch (err) {

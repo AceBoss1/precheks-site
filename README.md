@@ -175,3 +175,7 @@ Server-to-server integration with https://www.notesapp.name.ng/docs.
   Firestore `notesappEvents`.
 - `GET /api/notesapp/summary` (admin ID token) returns bookings, orders,
   digital sales and earnings.
+
+Saving a note in the admin form now syncs it to NotesApp automatically
+(best-effort; failures only log a console warning). `/admin` shows a
+NotesApp panel with bookings, orders, digital sales and earnings.
