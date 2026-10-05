@@ -154,3 +154,28 @@ public/images/             Logo, favicon, headshots, testimonials, note images
 ```
 
 
+
+## NotesApp API & webhooks (@precheks)
+
+Server-to-server integration with https://www.notesapp.name.ng/docs.
+
+1. Ask NotesApp to enable API access, then in the Console create a key with
+   scopes `read:posts`, `write:posts`, `read:bookings`, `read:orders`,
+   `read:earnings`. Add a webhook endpoint
+   `https://<your-domain>/api/webhooks/notesapp` for `booking.created`,
+   `order.paid`, `digital.sold`, `payout.released`, `post.published`.
+2. Set these env vars (host settings + `.env.local`, never `NEXT_PUBLIC_`):
+   `NOTESAPP_API_KEY`, `NOTESAPP_WEBHOOK_SECRET`,
+   `FIREBASE_SERVICE_ACCOUNT_JSON` (full service-account JSON).
+3. Re-publish `firestore.rules` (adds admin-only `notesappEvents`).
+
+- `/admin/notes` → **Sync to NotesApp** creates/updates the post via
+  `POST/PATCH /v1/posts` (idempotent; stores `notesappId`/`notesappUrl` on the note).
+- `/api/webhooks/notesapp` verifies the HMAC signature and stores events in
+  Firestore `notesappEvents`.
+- `GET /api/notesapp/summary` (admin ID token) returns bookings, orders,
+  digital sales and earnings.
+
+Saving a note in the admin form now syncs it to NotesApp automatically
+(best-effort; failures only log a console warning). `/admin` shows a
+NotesApp panel with bookings, orders, digital sales and earnings.
