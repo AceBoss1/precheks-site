@@ -1,3 +1,5 @@
+import NotesAppCTA from "@/components/NotesAppCTA";
+
 export const metadata = {
   title: "Services",
   description:
@@ -71,6 +73,8 @@ export default function ServicesPage() {
           </div>
         ))}
       </div>
+
+      <NotesAppCTA className="mt-10" />
 
       <div className="mt-16">
         <p className="eyebrow">Our Courses</p>
