@@ -11,6 +11,7 @@ export default function AdminNotesPage() {
   const { user, loading } = useAdminAuth();
   const [notes, setNotes] = useState<NoteWithComputed[] | null>(null);
   const [error, setError] = useState("");
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -29,6 +30,28 @@ export default function AdminNotesPage() {
     if (!confirm(`Delete "${title}"? This can't be undone.`)) return;
     await deleteNote(id);
     load();
+  }
+
+  async function handleSync(id: string) {
+    if (!user) return;
+    setSyncing(id);
+    try {
+      const res = await fetch("/api/notesapp/publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await user.getIdToken()}`,
+        },
+        body: JSON.stringify({ noteId: id }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || body.error || "Sync failed");
+      alert(`Synced to NotesApp${body.url ? `: ${body.url}` : ""}`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setSyncing(null);
+    }
   }
 
   if (loading || !user) {
@@ -106,6 +129,13 @@ export default function AdminNotesPage() {
                 >
                   Edit
                 </Link>
+                <button
+                  onClick={() => handleSync(n.id)}
+                  disabled={syncing === n.id}
+                  className="font-ui text-sm font-semibold text-slate hover:text-ink disabled:opacity-50"
+                >
+                  {syncing === n.id ? "Syncing…" : "Sync to NotesApp"}
+                </button>
                 <button
                   onClick={() => handleDelete(n.id, n.title)}
                   className="font-ui text-sm font-semibold text-red-700 hover:text-red-900"

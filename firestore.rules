@@ -357,5 +357,15 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-  }
+  
+    // ============================================================
+    // NOTESAPP WEBHOOK EVENTS — written server-side only (Admin SDK)
+    // ============================================================
+
+    match /notesappEvents/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+}
 }
