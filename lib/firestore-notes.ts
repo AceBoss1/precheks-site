@@ -7,7 +7,6 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  orderBy,
   where,
   Timestamp,
 } from "firebase/firestore";
@@ -39,6 +38,20 @@ export type NoteWithComputed = Note & {
 
 const COLLECTION = "notes";
 
+// Dates are stored as strings in mixed formats (RFC-2822 from the
+// imported/seeded notes, ISO from the editor), so a plain string sort —
+// including Firestore's orderBy("date") — orders by weekday name, not
+// by time. Always sort on the parsed timestamp instead.
+function dateValue(d: unknown): number {
+  if (d instanceof Timestamp) return d.toMillis();
+  const t = Date.parse(String(d ?? ""));
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function sortNewestFirst<T extends { date: unknown }>(notes: T[]): T[] {
+  return notes.sort((a, b) => dateValue(b.date) - dateValue(a.date));
+}
+
 function withComputed(note: Note): NoteWithComputed {
   const plain = note.content.replace(/\s+/g, " ").trim();
   const wordCount = plain.split(" ").filter(Boolean).length;
@@ -61,10 +74,9 @@ export function slugify(title: string): string {
 export async function getAllNotes(
   opts: { publishedOnly?: boolean } = { publishedOnly: true }
 ): Promise<NoteWithComputed[]> {
-  const q = query(collection(db, COLLECTION), orderBy("date", "desc"));
-  const snap = await getDocs(q);
-  const notes = snap.docs.map(
-    (d) => ({ id: d.id, ...d.data() } as Note)
+  const snap = await getDocs(collection(db, COLLECTION));
+  const notes = sortNewestFirst(
+    snap.docs.map((d) => ({ id: d.id, ...d.data() } as Note))
   );
   const filtered = opts.publishedOnly
     ? notes.filter((n) => n.status === "published")
@@ -91,9 +103,7 @@ export async function getNotesByAuthorUid(
   const q = query(collection(db, COLLECTION), where("authorUid", "==", uid));
   const snap = await getDocs(q);
   const notes = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Note));
-  return notes
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .map(withComputed);
+  return sortNewestFirst(notes).map(withComputed);
 }
 
 export async function getNoteById(id: string): Promise<Note | null> {
