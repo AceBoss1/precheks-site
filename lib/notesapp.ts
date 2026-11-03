@@ -11,11 +11,40 @@ export class NotesAppError extends Error {
   }
 }
 
+/**
+ * The configured key, cleaned of common copy-paste mistakes (surrounding
+ * whitespace/newlines, quotes, or a pasted "Bearer " prefix).
+ */
+export function apiKey(): string | undefined {
+  const raw = process.env.NOTESAPP_API_KEY;
+  if (!raw) return undefined;
+  return raw.trim().replace(/^["']|["']$/g, "").replace(/^Bearer\s+/i, "").trim() || undefined;
+}
+
+export const API_BASE = BASE;
+
+/** Raw request for diagnostics: never throws, returns status + parsed body. */
+export async function probe(
+  path: string,
+  base = BASE
+): Promise<{ status: number; body: unknown }> {
+  const key = apiKey();
+  try {
+    const res = await fetch(`${base}${path}`, {
+      headers: key ? { Authorization: `Bearer ${key}` } : {},
+      cache: "no-store",
+    });
+    return { status: res.status, body: await res.json().catch(() => null) };
+  } catch (e) {
+    return { status: 0, body: { error: { code: "network_error", message: String(e) } } };
+  }
+}
+
 async function call<T>(
   path: string,
   init: RequestInit & { idempotencyKey?: string } = {}
 ): Promise<T> {
-  const key = process.env.NOTESAPP_API_KEY;
+  const key = apiKey();
   if (!key) throw new NotesAppError(500, "not_configured", "NOTESAPP_API_KEY is not set");
   const headers: Record<string, string> = {
     Authorization: `Bearer ${key}`,

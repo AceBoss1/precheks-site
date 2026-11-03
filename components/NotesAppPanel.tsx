@@ -69,7 +69,14 @@ export default function NotesAppPanel({ user }: { user: User }) {
   return (
     <div className="mt-12">
       <p className="eyebrow">NotesApp — Bookings, Orders &amp; Earnings</p>
-      {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
+      {error && (
+        <p className="mt-3 text-sm text-red-700">
+          {error}{" "}
+          <a href="/admin/notesapp" className="underline text-gold-deep">
+            Check the NotesApp connection →
+          </a>
+        </p>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5">
         {cards.map((c) => (
           <div key={c.label} className="border border-rule bg-card p-5">

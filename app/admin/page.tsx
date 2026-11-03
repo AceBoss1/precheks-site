@@ -244,6 +244,12 @@ export default function AdminDashboard() {
             Leads
           </Link>
           <Link
+            href="/admin/notesapp"
+            className="border border-rule px-5 py-2.5 font-ui text-sm font-semibold hover:border-gold"
+          >
+            NotesApp
+          </Link>
+          <Link
             href="/admin/settings"
             className="border border-rule px-5 py-2.5 font-ui text-sm font-semibold hover:border-gold"
           >
