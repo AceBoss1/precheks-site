@@ -54,6 +54,9 @@ export const createPost = (p: PostInput, idempotencyKey: string) =>
 export const updatePost = (id: string, p: Partial<PostInput>) =>
   call<RemotePost>(`/v1/posts/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(p) });
 
+export const getPost = (id: string) =>
+  call<RemotePost & Record<string, unknown>>(`/v1/posts/${encodeURIComponent(id)}`);
+
 export const listPosts = (qs = "") => call<{ data: RemotePost[]; next_cursor: string | null }>(`/v1/posts${qs}`);
 export const listBookings = (qs = "") => call<{ data: unknown[]; next_cursor: string | null }>(`/v1/bookings${qs}`);
 export const listOrders = (qs = "") => call<{ data: unknown[]; next_cursor: string | null }>(`/v1/orders${qs}`);

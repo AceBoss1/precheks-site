@@ -172,7 +172,14 @@ Server-to-server integration with https://www.notesapp.name.ng/docs.
 - `/admin/notes` → **Sync to NotesApp** creates/updates the post via
   `POST/PATCH /v1/posts` (idempotent; stores `notesappId`/`notesappUrl` on the note).
 - `/api/webhooks/notesapp` verifies the HMAC signature and stores events in
-  Firestore `notesappEvents`.
+  Firestore `notesappEvents`. `post.*` events (e.g. `post.published`,
+  `post.updated`) are also mirrored into the `notes` collection the site
+  renders from — matched by `notesappId`, then slug; `post.deleted` /
+  `post.unpublished` set the local note back to draft. Subscribe the webhook
+  to `post.updated` and `post.deleted` too if NotesApp offers them.
+- `/admin/notes` → **Import from NotesApp** (`POST /api/notesapp/import`,
+  admin ID token) pulls every NotesApp post into `notes` — use it once to
+  backfill and any time a webhook was missed.
 - `GET /api/notesapp/summary` (admin ID token) returns bookings, orders,
   digital sales and earnings.
 
