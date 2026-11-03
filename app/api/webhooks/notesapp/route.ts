@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { adminDb } from "@/lib/firebase-admin";
+import { extractPost, upsertNoteFromPost } from "@/lib/notesapp-sync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,6 +37,14 @@ export async function POST(req: Request) {
     .collection("notesappEvents")
     .doc(evt.id)
     .set({ type: evt.type, created: evt.created, data: evt.data, receivedAt: new Date().toISOString() });
+
+  // Mirror the post into the `notes` collection the site renders from.
+  // (NotesApp only sends this for posts published through the API; the
+  // scheduled import catches posts written in the NotesApp app itself.)
+  if (evt.type === "post.published") {
+    const post = extractPost(evt.data);
+    if (post) await upsertNoteFromPost(post);
+  }
 
   return NextResponse.json({ received: true });
 }

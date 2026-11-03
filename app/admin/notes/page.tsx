@@ -12,6 +12,7 @@ export default function AdminNotesPage() {
   const [notes, setNotes] = useState<NoteWithComputed[] | null>(null);
   const [error, setError] = useState("");
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   async function load() {
     try {
@@ -54,6 +55,28 @@ export default function AdminNotesPage() {
     }
   }
 
+  async function handleImport() {
+    if (!user) return;
+    setImporting(true);
+    try {
+      const res = await fetch("/api/notesapp/import", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${await user.getIdToken()}` },
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.message || body.error || "Import failed");
+      alert(
+        `Imported from NotesApp: ${body.created} new, ${body.updated} updated` +
+          (body.skipped ? `, ${body.skipped} skipped` : "")
+      );
+      load();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }
+
   if (loading || !user) {
     return <div className="px-6 py-24 text-center text-slate">Loading…</div>;
   }
@@ -72,6 +95,13 @@ export default function AdminNotesPage() {
           >
             ← Dashboard
           </Link>
+          <button
+            onClick={handleImport}
+            disabled={importing}
+            className="border border-rule px-5 py-2.5 font-ui text-sm font-semibold hover:border-gold disabled:opacity-50"
+          >
+            {importing ? "Importing…" : "Import from NotesApp"}
+          </button>
           <Link
             href="/admin/notes/new"
             className="bg-gold text-ink font-ui font-semibold px-5 py-2.5 hover:bg-gold-deep hover:text-paper transition-colors"
