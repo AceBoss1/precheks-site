@@ -48,7 +48,8 @@ export default function PrivacyPolicyPage() {
         <p>
           Account and site data is stored using Google Firebase (Cloud
           Firestore and Firebase Authentication). Images you or we upload —
-          profile pictures and Note images — are hosted by Cloudinary. The
+          profile pictures and Note images — are hosted by NotesApp on
+          Cloudflare R2. The
           site itself is hosted on Vercel. Each of these providers has its
           own security practices and privacy policy governing infrastructure
           they operate.

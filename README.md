@@ -3,8 +3,8 @@
 A standalone Next.js site (no WordPress) with a dense, magazine-style
 homepage, a full "Notes" blog with a CMS (publish/edit/delete),
 category filtering, reader accounts, comments, likes, shares, view
-counts, and clickable @username profiles — built on Firestore +
-Cloudinary.
+counts, and clickable @username profiles — built on Firestore, with
+images stored in NotesApp's media storage (R2).
 
 ## Setup — one-time
 
@@ -28,13 +28,10 @@ Cloudinary.
      inside `isAdmin()`, then re-paste/publish in the Firebase Console.
    - These two files must always match exactly.
 
-3. **Cloudinary** (for Notes images and avatars)
-   - Sign up at [cloudinary.com](https://cloudinary.com) — free tier is
-     plenty.
-   - Dashboard → copy your **Cloud Name** into `.env.local`.
-   - Settings → Upload → Upload presets → Add upload preset → set
-     **Signing Mode to "Unsigned"** → copy the preset name into
-     `.env.local`.
+3. **Images** (Notes images and avatars) are uploaded to NotesApp's media
+   storage (R2) via `POST /api/media/upload` → NotesApp `POST /v1/uploads`.
+   Needs `NOTESAPP_API_KEY` with the `write:posts` scope (see the NotesApp
+   section below) — no separate image service to set up.
 
 4. **One Firestore index you'll need** — the first time someone's
    public profile is visited, Firestore may throw an error asking you
@@ -65,7 +62,7 @@ Cloudinary.
   signed-in reader who isn't one of your two admin accounts is bounced
   to the homepage if they try to load any `/admin/*` page.
 - The form: title (auto-slug, editable), categories/tags, author
-  picker (Chimdinma or Emmanuel), Cloudinary featured-image upload,
+  picker (Chimdinma or Emmanuel), featured-image upload,
   Markdown content, Draft/Published toggle.
 - Real security lives in `firestore.rules`, not the page — Firestore
   itself refuses writes from non-admin accounts.
@@ -78,7 +75,7 @@ Cloudinary.
 - **`/login`** — sign back in. The masthead shows **Sign In / Sign Up**
   when logged out, or **@yourusername** + Sign Out when logged in.
 - **`/profile/edit`** — any signed-in user (reader or admin) can edit
-  their own display name, bio, avatar (Cloudinary upload), and social
+  their own display name, bio, avatar (image upload), and social
   links (LinkedIn, Instagram, Facebook, X, WhatsApp, website).
 - **`/u/[username]`** — the public profile page: avatar, bio, social
   links, a "Precheks Team" badge for admins, their authored posts (if
@@ -147,7 +144,7 @@ lib/firestore-notes.ts     Firestore CRUD for notes (+ counters)
 lib/engagement.ts          Views, likes, shares, comments
 lib/users.ts                Profile CRUD, username reservation, activity queries
 lib/admin.ts                EDIT THIS: the two admin emails + their known profile info
-lib/cloudinary.ts          Unsigned image upload helper
+lib/upload.ts              Image upload helper (→ /api/media/upload → NotesApp R2)
 lib/seed-notes.json        Your 15 recovered posts, ready to import
 firestore.rules            EDIT THIS TOO (same two emails) — deploy in Firebase Console
 public/images/             Logo, favicon, headshots, testimonials, note images

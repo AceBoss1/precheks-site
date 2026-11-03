@@ -3,6 +3,10 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
+      // NotesApp media (R2) — images uploaded via /api/media/upload.
+      { protocol: "https", hostname: "**.notesapp.name.ng" },
+      { protocol: "https", hostname: "**.naapp.tech" },
+      { protocol: "https", hostname: "*.r2.dev" },
     ],
   },
 };

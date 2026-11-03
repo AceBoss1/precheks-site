@@ -26,12 +26,17 @@ export const API_BASE = BASE;
 /** Raw request for diagnostics: never throws, returns status + parsed body. */
 export async function probe(
   path: string,
-  base = BASE
+  init: { method?: string; body?: unknown } = {}
 ): Promise<{ status: number; body: unknown }> {
   const key = apiKey();
   try {
-    const res = await fetch(`${base}${path}`, {
-      headers: key ? { Authorization: `Bearer ${key}` } : {},
+    const res = await fetch(`${BASE}${path}`, {
+      method: init.method || "GET",
+      headers: {
+        ...(key ? { Authorization: `Bearer ${key}` } : {}),
+        ...(init.body !== undefined ? { "Content-Type": "application/json" } : {}),
+      },
+      ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
       cache: "no-store",
     });
     return { status: res.status, body: await res.json().catch(() => null) };
@@ -91,6 +96,18 @@ export const updatePost = (id: string, p: Partial<PostInput>) =>
 
 export const getPost = (id: string) =>
   call<RemotePost & Record<string, unknown>>(`/v1/posts/${encodeURIComponent(id)}`);
+
+export type UploadTicket = {
+  upload_url: string;
+  public_url: string;
+  key: string;
+  headers: Record<string, string>;
+  expires_in: number;
+};
+
+/** A one-time R2 upload URL for an image (POST /v1/uploads, scope write:posts). */
+export const createUpload = (p: { filename: string; content_type: string; size: number }) =>
+  call<UploadTicket>("/v1/uploads", { method: "POST", body: JSON.stringify(p) });
 
 export const listPosts = (qs = "") => call<{ data: RemotePost[]; next_cursor: string | null }>(`/v1/posts${qs}`);
 export const listBookings = (qs = "") => call<{ data: unknown[]; next_cursor: string | null }>(`/v1/bookings${qs}`);

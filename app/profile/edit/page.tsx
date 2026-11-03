@@ -6,7 +6,7 @@ import Image from "next/image";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getUserByUid, updateProfile, UserProfile } from "@/lib/users";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadImage } from "@/lib/upload";
 import { SocialLinks } from "@/lib/admin";
 
 const SOCIAL_FIELDS: { key: keyof SocialLinks; label: string }[] = [
@@ -54,8 +54,10 @@ export default function ProfileEditPage() {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file);
+      const url = await uploadImage(file);
       setAvatar(url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }

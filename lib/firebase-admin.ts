@@ -15,6 +15,17 @@ function adminApp() {
 
 export const adminDb = () => getFirestore(adminApp());
 
+/** Returns the caller's uid if the request carries any valid Firebase ID token. */
+export async function requireUser(req: Request): Promise<string | null> {
+  const token = req.headers.get("authorization")?.replace(/^Bearer /, "");
+  if (!token) return null;
+  try {
+    return (await getAuth(adminApp()).verifyIdToken(token)).uid;
+  } catch {
+    return null;
+  }
+}
+
 /** Returns the admin's email if the request carries a valid admin ID token. */
 export async function requireAdmin(req: Request): Promise<string | null> {
   const token = req.headers.get("authorization")?.replace(/^Bearer /, "");
