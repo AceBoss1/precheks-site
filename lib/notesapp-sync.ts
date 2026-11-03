@@ -3,11 +3,12 @@ import { adminDb } from "./firebase-admin";
 import { getPost, listPosts } from "./notesapp";
 
 // Pulls posts from NotesApp into the Firestore `notes` collection that the
-// site renders from. Used by the webhook (post.* events) and by the admin
-// "Import from NotesApp" action.
+// site renders from. Used by the `post.published` webhook and by the
+// import endpoint (admin button + scheduled sync).
 //
-// NotesApp payload field names are read defensively (several aliases per
-// field) so the mapping keeps working if the API adds or renames fields.
+// Post shape (https://www.naapp.tech/docs): id, slug, url, title, status,
+// date, tags, categories, featured_image, premium; `content` (Markdown) is
+// only returned by GET /v1/posts/{id}, so list items are hydrated from it.
 
 type AnyObj = Record<string, unknown>;
 
@@ -51,23 +52,20 @@ function slugify(title: string): string {
     .replace(/-+/g, "-");
 }
 
-/** Accepts a post object, or an event `data` that wraps one ({ post: {...} } / { object: {...} }). */
+/** Accepts a post object, or an event `data` that wraps one ({ post: {...} }). */
 export function extractPost(data: unknown): AnyObj | null {
   if (!data || typeof data !== "object") return null;
   const d = data as AnyObj;
-  for (const k of ["post", "object"]) {
-    if (d[k] && typeof d[k] === "object") return d[k] as AnyObj;
-  }
-  return d;
+  return d.post && typeof d.post === "object" ? (d.post as AnyObj) : d;
 }
 
 function postId(p: AnyObj): string | undefined {
-  const id = pick(p, "id", "post_id");
+  const id = pick(p, "id");
   return id === undefined ? undefined : String(id);
 }
 
 function postContent(p: AnyObj): string | undefined {
-  return str(pick(p, "content", "markdown", "body", "content_markdown"));
+  return str(pick(p, "content"));
 }
 
 /** Fetch the full post when the payload we got doesn't carry the body. */
@@ -97,11 +95,14 @@ export async function upsertNoteFromPost(
 
   const content = postContent(p);
   const slug = str(pick(p, "slug")) || slugify(title);
-  const date = toISO(pick(p, "published_at", "publishedAt", "created_at", "createdAt", "date"));
-  const status = pick(p, "status") === "published" ? "published" : "draft";
+  const date = toISO(pick(p, "date", "published_at", "created_at"));
+  // Premium posts are subscriber-only on NotesApp — don't publish their
+  // full text openly here; keep them as drafts.
+  const premium = pick(p, "premium") === true;
+  const status = pick(p, "status") === "published" && !premium ? "published" : "draft";
   const categories = strList(pick(p, "categories"));
   const tags = strList(pick(p, "tags"));
-  const image = str(pick(p, "featured_image", "featuredImage", "cover_image", "image"));
+  const image = str(pick(p, "featured_image"));
   const url = str(pick(p, "url"));
 
   const col = adminDb().collection("notes");
@@ -130,6 +131,9 @@ export async function upsertNoteFromPost(
     return { id: ref.id, created: false };
   }
 
+  // Never create an empty note (e.g. if fetching the post's content failed).
+  if (!content) return null;
+
   const ref = await col.add({
     title,
     slug,
@@ -148,17 +152,6 @@ export async function upsertNoteFromPost(
     ...synced,
   });
   return { id: ref.id, created: true };
-}
-
-/** Hide the local copy of a post that was deleted/unpublished on NotesApp. */
-export async function unpublishNoteForPost(raw: AnyObj): Promise<void> {
-  const remoteId = postId(raw);
-  if (!remoteId) return;
-  const snap = await adminDb()
-    .collection("notes")
-    .where("notesappId", "==", remoteId)
-    .get();
-  await Promise.all(snap.docs.map((d) => d.ref.update({ status: "draft" })));
 }
 
 /** Page through every NotesApp post and upsert each one. */

@@ -157,32 +157,41 @@ public/images/             Logo, favicon, headshots, testimonials, note images
 
 ## NotesApp API & webhooks (@precheks)
 
-Server-to-server integration with https://www.notesapp.name.ng/docs.
+Server-to-server integration with https://www.naapp.tech/docs
+(API base `https://www.naapp.tech/api`; override with `NOTESAPP_API_BASE`).
 
 1. Ask NotesApp to enable API access, then in the Console create a key with
    scopes `read:posts`, `write:posts`, `read:bookings`, `read:orders`,
    `read:earnings`. Add a webhook endpoint
    `https://<your-domain>/api/webhooks/notesapp` for `booking.created`,
-   `order.paid`, `digital.sold`, `payout.released`, `post.published`.
+   `order.paid`, `digital.sold`, `course.sold`, `payout.released`,
+   `post.published`.
 2. Set these env vars (host settings + `.env.local`, never `NEXT_PUBLIC_`):
    `NOTESAPP_API_KEY`, `NOTESAPP_WEBHOOK_SECRET`,
-   `FIREBASE_SERVICE_ACCOUNT_JSON` (full service-account JSON).
+   `FIREBASE_SERVICE_ACCOUNT_JSON` (full service-account JSON), and
+   `CRON_SECRET` (any long random string) for the scheduled import.
 3. Re-publish `firestore.rules` (adds admin-only `notesappEvents`).
 
+**Site → NotesApp**
 - `/admin/notes` → **Sync to NotesApp** creates/updates the post via
   `POST/PATCH /v1/posts` (idempotent; stores `notesappId`/`notesappUrl` on the note).
-- `/api/webhooks/notesapp` verifies the HMAC signature and stores events in
-  Firestore `notesappEvents`. `post.*` events (e.g. `post.published`,
-  `post.updated`) are also mirrored into the `notes` collection the site
-  renders from — matched by `notesappId`, then slug; `post.deleted` /
-  `post.unpublished` set the local note back to draft. Subscribe the webhook
-  to `post.updated` and `post.deleted` too if NotesApp offers them.
-- `/admin/notes` → **Import from NotesApp** (`POST /api/notesapp/import`,
-  admin ID token) pulls every NotesApp post into `notes` — use it once to
-  backfill and any time a webhook was missed.
+  Saving a note in the admin form does this automatically (best-effort).
+
+**NotesApp → site** (the `notes` collection the site renders from)
+- `/api/notesapp/import` lists every post (`GET /v1/posts`), fetches each
+  one's Markdown (`GET /v1/posts/{id}`) and creates/updates the matching
+  note — matched by `notesappId`, then slug. Existing notes keep their date,
+  author and counters; status follows NotesApp. **Premium** posts are kept
+  as drafts so subscriber-only text isn't published openly.
+  - `/admin/notes` → **Import from NotesApp** runs it on demand.
+  - `vercel.json` runs it daily via Vercel Cron (`GET` with
+    `Authorization: Bearer $CRON_SECRET`). On Vercel Pro you can make the
+    schedule more frequent, or point any external cron at the same URL.
+- `/api/webhooks/notesapp` verifies the HMAC signature, stores every event
+  in `notesappEvents`, and mirrors `post.published` into `notes` right away.
+  NotesApp only sends that event for posts published *through the API*, so
+  posts written in the NotesApp app arrive via the import above.
 - `GET /api/notesapp/summary` (admin ID token) returns bookings, orders,
   digital sales and earnings.
-
-Saving a note in the admin form now syncs it to NotesApp automatically
-(best-effort; failures only log a console warning). `/admin` shows a
-NotesApp panel with bookings, orders, digital sales and earnings.
+- `/admin` shows a NotesApp panel with bookings, orders, digital sales and
+  earnings.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { adminDb } from "@/lib/firebase-admin";
-import { extractPost, unpublishNoteForPost, upsertNoteFromPost } from "@/lib/notesapp-sync";
+import { extractPost, upsertNoteFromPost } from "@/lib/notesapp-sync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,16 +38,12 @@ export async function POST(req: Request) {
     .doc(evt.id)
     .set({ type: evt.type, created: evt.created, data: evt.data, receivedAt: new Date().toISOString() });
 
-  // Mirror NotesApp posts into the `notes` collection the site renders from.
-  if (evt.type.startsWith("post.")) {
+  // Mirror the post into the `notes` collection the site renders from.
+  // (NotesApp only sends this for posts published through the API; the
+  // scheduled import catches posts written in the NotesApp app itself.)
+  if (evt.type === "post.published") {
     const post = extractPost(evt.data);
-    if (post) {
-      if (/\.(deleted|unpublished|archived)$/.test(evt.type)) {
-        await unpublishNoteForPost(post);
-      } else {
-        await upsertNoteFromPost(post);
-      }
-    }
+    if (post) await upsertNoteFromPost(post);
   }
 
   return NextResponse.json({ received: true });

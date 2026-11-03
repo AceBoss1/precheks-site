@@ -1,9 +1,9 @@
 import "server-only";
 
-// Server-to-server client for the NotesApp API (https://www.notesapp.name.ng/docs).
+// Server-to-server client for the NotesApp API (https://www.naapp.tech/docs).
 // Key scopes needed: read:posts, write:posts, read:bookings, read:orders, read:earnings.
 
-const BASE = process.env.NOTESAPP_API_BASE || "https://www.notesapp.name.ng/api";
+const BASE = process.env.NOTESAPP_API_BASE || "https://www.naapp.tech/api";
 
 export class NotesAppError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -22,7 +22,13 @@ async function call<T>(
     "Content-Type": "application/json",
   };
   if (init.idempotencyKey) headers["Idempotency-Key"] = init.idempotencyKey;
-  const res = await fetch(`${BASE}${path}`, { ...init, headers, cache: "no-store" });
+  let res = await fetch(`${BASE}${path}`, { ...init, headers, cache: "no-store" });
+  if (res.status === 429) {
+    // 120 requests/min per key — wait as told (capped) and retry once.
+    const wait = Math.min(Number(res.headers.get("retry-after")) || 5, 30);
+    await new Promise((r) => setTimeout(r, wait * 1000));
+    res = await fetch(`${BASE}${path}`, { ...init, headers, cache: "no-store" });
+  }
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new NotesAppError(
