@@ -44,6 +44,23 @@ export async function GET(req: Request) {
     { name: "Earnings", scope: "read:earnings", path: "/v1/earnings?limit=1" },
   ];
 
+  // Image uploads: an empty POST should be rejected as `invalid_request`
+  // (400) if the endpoint exists; 404 means NotesApp hasn't deployed it.
+  const uploadCheck = async () => {
+    const r = await probe("/v1/uploads", { method: "POST", body: {} });
+    const err = (r.body as ErrBody | null)?.error;
+    const ok = r.status === 400 && err?.code === "invalid_request";
+    return {
+      name: "Image uploads (POST /v1/uploads)",
+      scope: "write:posts",
+      path: "/v1/uploads",
+      ok,
+      status: r.status,
+      code: ok ? null : r.status === 404 ? "uploads_unavailable" : err?.code ?? null,
+      message: ok ? null : r.status === 404 ? "NotesApp doesn't have the upload endpoint yet." : err?.message ?? null,
+    };
+  };
+
   const results = key
     ? await Promise.all(
         checks.map(async (c) => {
@@ -58,7 +75,7 @@ export async function GET(req: Request) {
             message: err?.message ?? null,
           };
         })
-      )
+      ).then(async (rs) => [...rs, { ...(await uploadCheck()), body: null }])
     : [];
 
   const account = results[0]?.ok ? results[0].body : null;

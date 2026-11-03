@@ -33,6 +33,8 @@ const ADVICE: Record<string, string> = {
     "The key works but lacks this permission. Create a new key with all five scopes (read:posts, write:posts, read:bookings, read:orders, read:earnings).",
   rate_limited: "Too many requests (120/min). Wait a minute and re-check.",
   not_configured: "NOTESAPP_API_KEY is not set in Vercel. Add it and redeploy.",
+  uploads_unavailable:
+    "Image uploads go to NotesApp's media storage through POST /v1/uploads, which the NotesApp deployment doesn't have yet. Deploy the NotesApp change that adds it.",
   network_error: "The server couldn't reach the NotesApp API at all.",
 };
 

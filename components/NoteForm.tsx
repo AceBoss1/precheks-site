@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Note, slugify, createNote, updateNote } from "@/lib/firestore-notes";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadImage } from "@/lib/upload";
 import { syncNoteToNotesApp } from "@/lib/notesapp-client";
 import { getUserByUsername, UserProfile } from "@/lib/users";
 
@@ -74,7 +74,7 @@ export default function NoteForm({
     setUploading(true);
     setError("");
     try {
-      const url = await uploadToCloudinary(file);
+      const url = await uploadImage(file);
       setFeaturedImage(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
